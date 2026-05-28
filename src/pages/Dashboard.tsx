@@ -9,22 +9,24 @@ import { useRooms } from '@/hooks/useRooms';
 import { useOrders } from '@/hooks/useOrders';
 import { useGuestStays } from '@/hooks/useGuestStays';
 import GuestDashboard from '@/pages/guest/GuestDashboard';
-import { Bed, UtensilsCrossed, Clock, Users, ChefHat, Truck, Loader2, RefreshCw } from 'lucide-react';
+import { Bed, UtensilsCrossed, Clock, Users, ChefHat, Truck, Loader2, RefreshCw, AlertTriangle, Settings } from 'lucide-react';
+import { Link, Navigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { defaultPortalPath } from '@/lib/rolePortal';
 
 export default function Dashboard() {
-  const { hasRole, hasAnyRole } = useAuth();
+  const { user, hasRole, hasAnyRole } = useAuth();
   const { rooms, stats: roomStats, isLoading: roomsLoading, refetch: refetchRooms } = useRooms();
   const { orders, stats: orderStats, isLoading: ordersLoading, refetch: refetchOrders } = useOrders();
   const { todayCheckIns, currentGuests, refetch: refetchStays } = useGuestStays();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const isReceptionist = hasRole('super_admin');
-  const isAdmin = hasRole('admin');
+  const isHotelAdmin = hasAnyRole(['platform_admin', 'hotel_admin', 'super_admin']);
+  const isAdmin = hasAnyRole(['property_manager', 'receptionist', 'admin']) || isHotelAdmin;
   const isFoodManager = hasRole('food_manager');
   const isKitchenManager = hasRole('kitchen_manager');
   const isWaiter = hasRole('waiter');
-  const isGuest = hasRole('guest') && !hasAnyRole(['super_admin', 'admin', 'food_manager', 'kitchen_manager', 'waiter']);
+  const isGuest = hasRole('guest') && !hasAnyRole(['platform_admin', 'hotel_admin', 'property_manager', 'receptionist', 'housekeeping', 'maintenance', 'super_admin', 'admin', 'food_manager', 'kitchen_manager', 'waiter']);
 
   const isLoading = roomsLoading || ordersLoading;
 
@@ -39,8 +41,12 @@ export default function Dashboard() {
     return <GuestDashboard />;
   }
 
+  if (!isAdmin && !isFoodManager && !isKitchenManager && !isWaiter) {
+    return <Navigate to={defaultPortalPath(user?.roles || [])} replace />;
+  }
+
   // Get active orders for live feed
-  const showLiveOrders = isKitchenManager || isFoodManager || isWaiter;
+  const showLiveOrders = isAdmin || isKitchenManager || isFoodManager || isWaiter;
 
   const activeOrders = orders
     .filter(o => !['delivered', 'cancelled'].includes(o.status))
@@ -80,8 +86,8 @@ export default function Dashboard() {
           <div>
             <h2 className="text-2xl font-bold tracking-tight">Dashboard</h2>
             <p className="text-muted-foreground">
-              {isReceptionist && 'Front desk operations overview'}
-              {isAdmin && 'Hotel operations overview'}
+              {isHotelAdmin && 'Hotel owner operations overview'}
+              {!isHotelAdmin && isAdmin && 'Front desk operations overview'}
               {isFoodManager && 'Food & beverage operations'}
               {isKitchenManager && 'Kitchen operations status'}
               {isWaiter && 'Your delivery assignments'}
@@ -92,8 +98,28 @@ export default function Dashboard() {
           </Button>
         </div>
 
+        {isHotelAdmin && roomStats.total === 0 && (
+          <div className="border-2 border-amber-600 bg-amber-50 p-4 text-amber-950">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="mt-1 h-5 w-5" />
+                <div>
+                  <h3 className="font-bold">Complete your hotel setup to start using HotelOps</h3>
+                  <p className="text-sm">Step 1: Hotel Profile - Step 2: Add Rooms - Step 3: Payment Settings - Step 4: Invite Staff</p>
+                </div>
+              </div>
+              <Button asChild variant="outline">
+                <Link to="/settings">
+                  <Settings className="mr-2 h-4 w-4" />
+                  Open Settings
+                </Link>
+              </Button>
+            </div>
+          </div>
+        )}
+
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {(isReceptionist || isAdmin) && (
+          {isAdmin && (
             <>
               <ClickableStatCard
                 title="Rooms Occupied"
@@ -147,7 +173,7 @@ export default function Dashboard() {
               title="My Deliveries Today"
               value={orderStats.ready}
               icon={<Truck className="h-5 w-5" />}
-              href="/deliveries"
+              href="/kitchen"
             />
           )}
         </div>
@@ -167,7 +193,7 @@ export default function Dashboard() {
             </div>
           )}
 
-          {(isReceptionist || isAdmin) && (
+          {isAdmin && (
             <div className="space-y-4">
               <h3 className="text-lg font-bold">Room Status</h3>
               <div className="border-2 border-border p-4">

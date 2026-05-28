@@ -13,12 +13,32 @@ import InventoryPage from "./pages/InventoryPage";
 import ComplaintsPage from "./pages/ComplaintsPage";
 import CheckInOutPage from "./pages/CheckInOutPage";
 import PaymentsPage from "./pages/PaymentsPage";
+import SettingsPage from "./pages/SettingsPage";
+import StaffPage from "./pages/StaffPage";
+import HousekeepingPage from "./pages/HousekeepingPage";
+import MaintenancePage from "./pages/MaintenancePage";
+import ReportsPage from "./pages/ReportsPage";
+import PlatformPage from "./pages/PlatformPage";
 import NotFound from "./pages/NotFound";
+import { defaultPortalPath } from "@/lib/rolePortal";
 
 const queryClient = new QueryClient();
 
-type StaffRole = 'super_admin' | 'admin' | 'food_manager' | 'kitchen_manager' | 'waiter';
-const STAFF_ROLES: StaffRole[] = ['super_admin', 'admin', 'food_manager', 'kitchen_manager', 'waiter'];
+type StaffRole =
+  | 'platform_admin'
+  | 'hotel_admin'
+  | 'property_manager'
+  | 'receptionist'
+  | 'housekeeping'
+  | 'maintenance'
+  | 'super_admin'
+  | 'admin'
+  | 'food_manager'
+  | 'kitchen_manager'
+  | 'waiter';
+const STAFF_ROLES: StaffRole[] = ['platform_admin', 'hotel_admin', 'property_manager', 'receptionist', 'housekeeping', 'maintenance', 'super_admin', 'admin', 'food_manager', 'kitchen_manager', 'waiter'];
+const HOTEL_ADMIN_ROLES: StaffRole[] = ['platform_admin', 'hotel_admin', 'super_admin'];
+const FRONT_DESK_ROLES: StaffRole[] = ['platform_admin', 'hotel_admin', 'property_manager', 'receptionist', 'super_admin', 'admin'];
 
 function StaffRoute({ children, roles = STAFF_ROLES }: { children: React.ReactNode; roles?: StaffRole[] }) {
   const { user, loading, hasAnyRole } = useAuth();
@@ -33,7 +53,7 @@ function StaffRoute({ children, roles = STAFF_ROLES }: { children: React.ReactNo
   
   if (!user) return <Navigate to="/staff-login" replace />;
   if (!hasAnyRole(STAFF_ROLES)) return <Navigate to="/client-login" replace />;
-  if (!hasAnyRole(roles)) return <Navigate to="/dashboard" replace />;
+  if (!hasAnyRole(roles)) return <Navigate to={defaultPortalPath(user.roles)} replace />;
   return <>{children}</>;
 }
 
@@ -46,13 +66,19 @@ function AppRoutes() {
       
       {/* Staff Routes */}
       <Route path="/dashboard" element={<StaffRoute><Dashboard /></StaffRoute>} />
-      <Route path="/rooms" element={<StaffRoute roles={['super_admin', 'admin']}><RoomsPage /></StaffRoute>} />
-      <Route path="/guests" element={<StaffRoute roles={['super_admin']}><CheckInOutPage /></StaffRoute>} />
-      <Route path="/payments" element={<StaffRoute roles={['super_admin', 'admin']}><PaymentsPage /></StaffRoute>} />
-      <Route path="/kitchen" element={<StaffRoute roles={['kitchen_manager']}><KitchenQueue /></StaffRoute>} />
-      <Route path="/menu" element={<StaffRoute roles={['food_manager', 'admin']}><MenuPage /></StaffRoute>} />
-      <Route path="/inventory" element={<StaffRoute roles={['food_manager', 'kitchen_manager', 'admin']}><InventoryPage /></StaffRoute>} />
-      <Route path="/complaints" element={<StaffRoute roles={['super_admin', 'admin', 'food_manager']}><ComplaintsPage /></StaffRoute>} />
+      <Route path="/rooms" element={<StaffRoute roles={FRONT_DESK_ROLES}><RoomsPage /></StaffRoute>} />
+      <Route path="/guests" element={<StaffRoute roles={FRONT_DESK_ROLES}><CheckInOutPage /></StaffRoute>} />
+      <Route path="/payments" element={<StaffRoute roles={FRONT_DESK_ROLES}><PaymentsPage /></StaffRoute>} />
+      <Route path="/housekeeping" element={<StaffRoute roles={['platform_admin', 'hotel_admin', 'property_manager', 'housekeeping', 'super_admin']}><HousekeepingPage /></StaffRoute>} />
+      <Route path="/maintenance" element={<StaffRoute roles={['platform_admin', 'hotel_admin', 'property_manager', 'maintenance', 'super_admin']}><MaintenancePage /></StaffRoute>} />
+      <Route path="/kitchen" element={<StaffRoute roles={['platform_admin', 'hotel_admin', 'property_manager', 'super_admin', 'kitchen_manager', 'waiter']}><KitchenQueue /></StaffRoute>} />
+      <Route path="/menu" element={<StaffRoute roles={['platform_admin', 'hotel_admin', 'property_manager', 'super_admin', 'food_manager']}><MenuPage /></StaffRoute>} />
+      <Route path="/inventory" element={<StaffRoute roles={['platform_admin', 'hotel_admin', 'property_manager', 'super_admin', 'food_manager', 'kitchen_manager']}><InventoryPage /></StaffRoute>} />
+      <Route path="/complaints" element={<StaffRoute roles={['platform_admin', 'hotel_admin', 'property_manager', 'receptionist', 'super_admin', 'admin', 'food_manager']}><ComplaintsPage /></StaffRoute>} />
+      <Route path="/reports" element={<StaffRoute roles={['platform_admin', 'hotel_admin', 'property_manager', 'super_admin']}><ReportsPage /></StaffRoute>} />
+      <Route path="/settings" element={<StaffRoute roles={HOTEL_ADMIN_ROLES}><SettingsPage /></StaffRoute>} />
+      <Route path="/staff" element={<StaffRoute roles={HOTEL_ADMIN_ROLES}><StaffPage /></StaffRoute>} />
+      <Route path="/platform" element={<StaffRoute roles={['platform_admin']}><PlatformPage /></StaffRoute>} />
       
       <Route path="*" element={<NotFound />} />
     </Routes>

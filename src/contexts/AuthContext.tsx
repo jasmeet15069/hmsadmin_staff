@@ -142,7 +142,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   
   const hasAnyRole = (roles: AppRole[]) => roles.some(role => hasRole(role));
 
-  const isStaff = hasAnyRole(['super_admin', 'admin', 'food_manager', 'kitchen_manager', 'waiter']);
+  const isStaff = hasAnyRole([
+    'platform_admin',
+    'hotel_admin',
+    'property_manager',
+    'receptionist',
+    'housekeeping',
+    'maintenance',
+    'super_admin',
+    'admin',
+    'food_manager',
+    'kitchen_manager',
+    'waiter',
+  ]);
 
   return (
     <AuthContext.Provider value={{

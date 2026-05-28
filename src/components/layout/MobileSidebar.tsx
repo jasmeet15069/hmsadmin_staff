@@ -10,6 +10,12 @@ import {
   Package,
   MessageSquareWarning,
   CreditCard,
+  ClipboardCheck,
+  Wrench,
+  BarChart3,
+  Settings,
+  UserCog,
+  ShieldCheck,
 } from 'lucide-react';
 import { AppRole, ROLE_LABELS } from '@/types/auth';
 import { SheetClose } from '@/components/ui/sheet';
@@ -22,14 +28,20 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['super_admin', 'admin', 'food_manager', 'kitchen_manager', 'waiter'] },
-  { label: 'Rooms', href: '/rooms', icon: Bed, roles: ['super_admin', 'admin'] },
-  { label: 'Guests / Bookings', href: '/guests', icon: Users, roles: ['super_admin'] },
-  { label: 'Complaints', href: '/complaints', icon: MessageSquareWarning, roles: ['super_admin', 'admin', 'food_manager'] },
-  { label: 'Payments', href: '/payments', icon: CreditCard, roles: ['super_admin', 'admin'] },
-  { label: 'Menu', href: '/menu', icon: UtensilsCrossed, roles: ['food_manager', 'admin'] },
-  { label: 'Inventory', href: '/inventory', icon: Package, roles: ['food_manager', 'kitchen_manager', 'admin'] },
-  { label: 'Order Queue', href: '/kitchen', icon: ChefHat, roles: ['kitchen_manager'] },
+  { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['platform_admin', 'hotel_admin', 'property_manager', 'receptionist', 'super_admin', 'admin', 'food_manager', 'kitchen_manager', 'waiter'] },
+  { label: 'Rooms', href: '/rooms', icon: Bed, roles: ['platform_admin', 'hotel_admin', 'property_manager', 'receptionist', 'super_admin', 'admin'] },
+  { label: 'Guests / Bookings', href: '/guests', icon: Users, roles: ['platform_admin', 'hotel_admin', 'property_manager', 'receptionist', 'super_admin', 'admin'] },
+  { label: 'Housekeeping', href: '/housekeeping', icon: ClipboardCheck, roles: ['platform_admin', 'hotel_admin', 'property_manager', 'housekeeping', 'super_admin'] },
+  { label: 'Maintenance', href: '/maintenance', icon: Wrench, roles: ['platform_admin', 'hotel_admin', 'property_manager', 'maintenance', 'super_admin'] },
+  { label: 'Complaints', href: '/complaints', icon: MessageSquareWarning, roles: ['platform_admin', 'hotel_admin', 'property_manager', 'receptionist', 'super_admin', 'admin', 'food_manager'] },
+  { label: 'Payments', href: '/payments', icon: CreditCard, roles: ['platform_admin', 'hotel_admin', 'property_manager', 'receptionist', 'super_admin', 'admin'] },
+  { label: 'Menu', href: '/menu', icon: UtensilsCrossed, roles: ['platform_admin', 'hotel_admin', 'property_manager', 'super_admin', 'food_manager'] },
+  { label: 'Inventory', href: '/inventory', icon: Package, roles: ['platform_admin', 'hotel_admin', 'property_manager', 'super_admin', 'food_manager', 'kitchen_manager'] },
+  { label: 'Order Queue', href: '/kitchen', icon: ChefHat, roles: ['platform_admin', 'hotel_admin', 'property_manager', 'super_admin', 'kitchen_manager', 'waiter'] },
+  { label: 'Reports', href: '/reports', icon: BarChart3, roles: ['platform_admin', 'hotel_admin', 'property_manager', 'super_admin'] },
+  { label: 'Settings', href: '/settings', icon: Settings, roles: ['platform_admin', 'hotel_admin', 'super_admin'] },
+  { label: 'Staff', href: '/staff', icon: UserCog, roles: ['platform_admin', 'hotel_admin', 'super_admin'] },
+  { label: 'Platform', href: '/platform', icon: ShieldCheck, roles: ['platform_admin'] },
 ];
 
 export function MobileSidebar() {

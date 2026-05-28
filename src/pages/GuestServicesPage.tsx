@@ -106,7 +106,7 @@ export default function GuestServicesPage() {
     }
 
     setIsRateLoading(true);
-    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8787/api'}/exchange-rate?base=USD&target=${selected.currency}`)
+    fetch(`${import.meta.env.VITE_API_URL || '/api'}/exchange-rate?base=USD&target=${selected.currency}`)
       .then(response => response.json())
       .then(payload => {
         if (payload.error) throw new Error(payload.error);
@@ -205,7 +205,7 @@ export default function GuestServicesPage() {
 
     setIsCheckingOut(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8787/api'}/bookings/checkout`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/bookings/checkout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

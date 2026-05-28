@@ -7,12 +7,12 @@ interface OrderStatusBadgeProps {
 }
 
 const statusConfig: Record<OrderStatus, { label: string; className: string }> = {
-  pending: { label: 'Pending', className: 'bg-muted text-muted-foreground border-muted-foreground' },
-  confirmed: { label: 'Confirmed', className: 'bg-blue-100 text-blue-800 border-blue-800' },
+  pending: { label: 'New Orders', className: 'bg-muted text-muted-foreground border-muted-foreground' },
+  confirmed: { label: 'New Orders', className: 'bg-muted text-muted-foreground border-muted-foreground' },
   preparing: { label: 'Preparing', className: 'bg-amber-100 text-amber-800 border-amber-800' },
-  ready: { label: 'Ready', className: 'bg-green-100 text-green-800 border-green-800' },
-  picked_up: { label: 'Picked Up', className: 'bg-purple-100 text-purple-800 border-purple-800' },
-  delivered: { label: 'Delivered', className: 'bg-primary text-primary-foreground border-primary' },
+  ready: { label: 'Ready for Pickup', className: 'bg-green-100 text-green-800 border-green-800' },
+  picked_up: { label: 'Delivered', className: 'bg-blue-100 text-blue-800 border-blue-800' },
+  delivered: { label: 'Delivered', className: 'bg-blue-100 text-blue-800 border-blue-800' },
   cancelled: { label: 'Cancelled', className: 'bg-destructive/10 text-destructive border-destructive' },
 };
 

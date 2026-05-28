@@ -11,11 +11,14 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PerishableForecast } from '@/components/inventory/PerishableForecast';
 import { useInventory } from '@/hooks/useInventory';
+import { useHotelBranding } from '@/hooks/useHotelBranding';
+import { formatCurrency, getCountryOption } from '@/lib/currency';
 import { Plus, Search, AlertTriangle, Package, TrendingDown, Loader2, Trash2, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function InventoryPage() {
   const { items, isLoading, lowStockItems, expiringItems, createItem, deleteItem, refetch } = useInventory();
+  const { branding } = useHotelBranding();
   const [searchQuery, setSearchQuery] = useState('');
   const [showLowStock, setShowLowStock] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
@@ -32,11 +35,14 @@ export default function InventoryPage() {
   });
 
   const getStockLevel = (current: number, min: number) => {
+    if (min <= 0) return { level: 'good', color: 'bg-green-500' };
     const ratio = current / min;
     if (ratio < 0.5) return { level: 'critical', color: 'bg-destructive' };
     if (ratio < 1) return { level: 'low', color: 'bg-amber-500' };
     return { level: 'good', color: 'bg-green-500' };
   };
+  const currencyOption = getCountryOption(branding.country, branding.currency);
+  const money = (amount: number) => formatCurrency(amount, currencyOption);
 
   const handleAddItem = async () => {
     const success = await createItem({
@@ -78,7 +84,7 @@ export default function InventoryPage() {
           <div>
             <h2 className="text-2xl font-bold tracking-tight">Inventory</h2>
             <p className="text-muted-foreground">
-              {items.length} items • {lowStockItems.length} low stock alerts
+              {items.length} items - {lowStockItems.length} low stock alerts
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -174,7 +180,7 @@ export default function InventoryPage() {
                       </p>
                       <ul className="mt-2 text-sm text-amber-700">
                         {lowStockItems.slice(0, 3).map(item => (
-                          <li key={item.id}>• {item.name}: {Number(item.current_stock)}/{Number(item.min_stock)} {item.unit}</li>
+                          <li key={item.id}>- {item.name}: {Number(item.current_stock)}/{Number(item.min_stock)} {item.unit}</li>
                         ))}
                       </ul>
                     </div>
@@ -212,12 +218,13 @@ export default function InventoryPage() {
                 <TableHeader>
                   <TableRow className="border-b-2">
                     <TableHead>Item</TableHead>
-                    <TableHead>Stock Level</TableHead>
-                    <TableHead>Quantity</TableHead>
-                    <TableHead>Cost/Unit</TableHead>
-                    <TableHead>Supplier</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead>In Stock</TableHead>
+                    <TableHead>Min Required</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead></TableHead>
+                    <TableHead>Supplier</TableHead>
+                    <TableHead>Expiry</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -236,24 +243,25 @@ export default function InventoryPage() {
                               <p className="font-medium">{item.name}</p>
                               {item.is_perishable && (
                                 <p className="text-xs text-muted-foreground">
-                                  Perishable • Expires: {item.expiry_date || 'N/A'}
+                                  Perishable - tracked for FIFO
                                 </p>
                               )}
                             </div>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="w-32">
-                            <Progress value={Math.min((Number(item.current_stock) / Number(item.min_stock)) * 100, 100)} className={cn('h-2', stock.color)} />
-                            <p className="mt-1 text-xs text-muted-foreground">Min: {Number(item.min_stock)} {item.unit}</p>
-                          </div>
+                          {item.unit || 'unit'}
                         </TableCell>
                         <TableCell>
                           <span className="font-mono font-bold">{Number(item.current_stock)}</span>{' '}
                           <span className="text-muted-foreground">{item.unit}</span>
                         </TableCell>
-                        <TableCell>${Number(item.cost_per_unit || 0).toFixed(2)}</TableCell>
-                        <TableCell>{item.supplier || '-'}</TableCell>
+                        <TableCell>
+                          <div className="w-32">
+                            <Progress value={Number(item.min_stock) > 0 ? Math.min((Number(item.current_stock) / Number(item.min_stock)) * 100, 100) : 100} className={cn('h-2', stock.color)} />
+                            <p className="mt-1 text-xs text-muted-foreground">{Number(item.min_stock)} {item.unit}</p>
+                          </div>
+                        </TableCell>
                         <TableCell>
                           <div className="flex flex-wrap gap-1">
                             {stock.level !== 'good' && (
@@ -271,6 +279,13 @@ export default function InventoryPage() {
                             )}
                           </div>
                         </TableCell>
+                        <TableCell>{item.supplier || '-'}</TableCell>
+                        <TableCell>
+                          {item.is_perishable && item.expiry_date ? new Date(item.expiry_date).toLocaleDateString() : '-'}
+                          {item.cost_per_unit ? (
+                            <p className="text-xs text-muted-foreground">{money(Number(item.cost_per_unit))}/unit</p>
+                          ) : null}
+                        </TableCell>
                         <TableCell>
                           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => deleteItem(item.id)}>
                             <Trash2 className="h-4 w-4 text-destructive" />
@@ -281,7 +296,7 @@ export default function InventoryPage() {
                   })}
                   {filteredItems.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
+                      <TableCell colSpan={8} className="py-8 text-center text-muted-foreground">
                         No inventory items found
                       </TableCell>
                     </TableRow>

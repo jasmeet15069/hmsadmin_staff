@@ -5,13 +5,18 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { usePayments } from '@/hooks/usePayments';
+import { useHotelBranding } from '@/hooks/useHotelBranding';
+import { formatCurrency, getCountryOption } from '@/lib/currency';
 import { Loader2, CheckCircle, XCircle, Clock, Search, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function PaymentsPage() {
   const { payments, isLoading, stats, refetch } = usePayments();
+  const { branding } = useHotelBranding();
   const [searchQuery, setSearchQuery] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const currencyOption = getCountryOption(branding.country, branding.currency);
+  const money = (amount: number) => formatCurrency(amount, currencyOption);
 
   const filteredPayments = payments.filter(payment =>
     payment.payment_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -67,7 +72,7 @@ export default function PaymentsPage() {
           <div>
             <h2 className="text-2xl font-bold tracking-tight">Payments</h2>
             <p className="text-muted-foreground">
-              {stats.completed} completed | {stats.pending} pending | ${stats.total.toFixed(2)} total
+              {stats.completed} completed | {stats.pending} pending | {money(stats.total)} total
             </p>
           </div>
           <Button variant="outline" size="icon" onClick={handleRefresh} aria-label="Refresh payments" title="Refresh payments">
@@ -90,7 +95,7 @@ export default function PaymentsPage() {
           </div>
           <div className="border-2 border-primary bg-primary/5 p-4">
             <p className="text-sm font-medium">Total Revenue</p>
-            <p className="text-3xl font-bold">${stats.total.toFixed(2)}</p>
+            <p className="text-3xl font-bold">{money(stats.total)}</p>
           </div>
         </div>
 
@@ -130,7 +135,7 @@ export default function PaymentsPage() {
                     )}
                   </TableCell>
                   <TableCell>{payment.orders?.order_number || '-'}</TableCell>
-                  <TableCell className="font-mono font-bold">${Number(payment.amount).toFixed(2)}</TableCell>
+                  <TableCell className="font-mono font-bold">{money(Number(payment.amount))}</TableCell>
                   <TableCell>{payment.payment_method}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">

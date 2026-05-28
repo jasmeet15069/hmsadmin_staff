@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 
 type Message = { role: 'user' | 'assistant'; content: string };
 
-const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8787/api').replace(/\/$/, '');
+const API_URL = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '');
 const CHAT_URL = `${API_URL}/ai/chat`;
 
 export function useAIConcierge() {

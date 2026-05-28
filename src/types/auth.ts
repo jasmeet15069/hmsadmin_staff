@@ -1,4 +1,16 @@
-export type AppRole = 'super_admin' | 'admin' | 'food_manager' | 'kitchen_manager' | 'waiter' | 'guest';
+export type AppRole =
+  | 'platform_admin'
+  | 'hotel_admin'
+  | 'property_manager'
+  | 'receptionist'
+  | 'housekeeping'
+  | 'maintenance'
+  | 'super_admin'
+  | 'admin'
+  | 'food_manager'
+  | 'kitchen_manager'
+  | 'waiter'
+  | 'guest';
 
 export interface UserProfile {
   id: string;
@@ -25,8 +37,14 @@ export interface AuthUser {
 }
 
 export const ROLE_LABELS: Record<AppRole, string> = {
-  super_admin: 'Receptionist',
-  admin: 'Admin (CEO/Owner)',
+  platform_admin: 'Platform Admin',
+  hotel_admin: 'Hotel Admin',
+  property_manager: 'Property Manager',
+  receptionist: 'Receptionist',
+  housekeeping: 'Housekeeping',
+  maintenance: 'Maintenance',
+  super_admin: 'Hotel Admin (Owner)',
+  admin: 'Receptionist',
   food_manager: 'Food Manager',
   kitchen_manager: 'Kitchen Manager',
   waiter: 'Waiter/Kooli',
@@ -34,8 +52,14 @@ export const ROLE_LABELS: Record<AppRole, string> = {
 };
 
 export const ROLE_DESCRIPTIONS: Record<AppRole, string> = {
-  super_admin: 'Front desk operations, check-in/out, order placement',
-  admin: 'Revenue dashboards, staff management, audit logs',
+  platform_admin: 'HotelOps vendor-level access across tenants',
+  hotel_admin: 'Owns hotel setup, billing, staff, and operations',
+  property_manager: 'Manages property operations and reports',
+  receptionist: 'Front desk operations, check-in/out, and guest management',
+  housekeeping: 'Room readiness and housekeeping assignments',
+  maintenance: 'Work orders and maintenance queues',
+  super_admin: 'Highest hotel role with full operational access',
+  admin: 'Front desk operations, check-in/out, and guest management',
   food_manager: 'Menu CRUD, recipes, suppliers, food inventory',
   kitchen_manager: 'Live order queue, cooking workflow, inventory deduction',
   waiter: 'Delivery assignments, pickup/delivery status, tips',

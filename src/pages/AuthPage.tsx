@@ -3,6 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { LoginForm } from '@/components/auth/LoginForm';
 import { Hotel } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { defaultPortalPath } from '@/lib/rolePortal';
 
 interface AuthPageProps {
   portal: 'client' | 'staff';
@@ -23,7 +24,7 @@ export default function AuthPage({ portal }: AuthPageProps) {
   if (user) {
     const isGuestOnly = user.roles.includes('guest') && user.roles.length === 1;
     if (!isGuestOnly) {
-      return <Navigate to="/dashboard" replace />;
+      return <Navigate to={defaultPortalPath(user.roles)} replace />;
     }
     return (
       <div className="flex min-h-screen items-center justify-center bg-background p-6">
@@ -55,7 +56,7 @@ export default function AuthPage({ portal }: AuthPageProps) {
         
         <div className="space-y-6">
           <blockquote className="text-xl font-medium leading-relaxed text-primary-foreground">
-            "A focused operations console for reception, rooms, food orders, complaints, payments, and kitchen workflows."
+            "Role-specific portals for reception, housekeeping, maintenance, kitchen, payments, reporting, and hotel administration."
           </blockquote>
           <div className="space-y-1">
             <p className="font-bold text-primary-foreground">{portalTitle}</p>
@@ -67,11 +68,11 @@ export default function AuthPage({ portal }: AuthPageProps) {
 
         <div className="grid grid-cols-3 gap-6 text-primary-foreground/70">
           <div>
-            <p className="text-3xl font-bold text-primary-foreground">6</p>
+            <p className="text-3xl font-bold text-primary-foreground">10</p>
             <p className="text-sm">Staff Roles</p>
           </div>
           <div>
-            <p className="text-3xl font-bold text-primary-foreground">∞</p>
+            <p className="text-3xl font-bold text-primary-foreground">24/7</p>
             <p className="text-sm">Live Updates</p>
           </div>
           <div>

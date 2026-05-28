@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useMenu } from '@/hooks/useMenu';
+import { useHotelBranding } from '@/hooks/useHotelBranding';
 import { supabase } from '@/integrations/supabase/client';
 import { Plus, Edit, Trash2, Search, Loader2, RefreshCw, Eye, EyeOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -49,6 +50,7 @@ const COUNTRY_OPTIONS = [
 ];
 
 export default function MenuPage() {
+  const { branding } = useHotelBranding();
   const { items, categories, isLoading, refetch, createItem, updateItem, deleteItem } = useMenu();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -63,6 +65,13 @@ export default function MenuPage() {
   const [customizations, setCustomizations] = useState<CustomizationForm[]>(defaultCustomizations);
 
   const selectedCountry = COUNTRY_OPTIONS.find(option => option.country === selectedCountryName) || COUNTRY_OPTIONS[0];
+
+  useEffect(() => {
+    const option =
+      COUNTRY_OPTIONS.find(item => item.country === branding.country) ||
+      COUNTRY_OPTIONS.find(item => item.currency === branding.currency);
+    if (option) setSelectedCountryName(option.country);
+  }, [branding.country, branding.currency]);
 
   const filteredItems = items.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -89,7 +98,7 @@ export default function MenuPage() {
 
     setIsRateLoading(true);
     setRateError(null);
-    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8787/api'}/exchange-rate?base=USD&target=${selectedCountry.currency}`)
+    fetch(`${import.meta.env.VITE_API_URL || '/api'}/exchange-rate?base=USD&target=${selectedCountry.currency}`)
       .then(response => response.json())
       .then(payload => {
         if (cancelled) return;
@@ -120,7 +129,6 @@ export default function MenuPage() {
     setEditingItem(null);
     setForm({ ...blankForm, category_id: categories[0]?.id || '' });
     setCustomizations(defaultCustomizations);
-    setSelectedCountryName(COUNTRY_OPTIONS[0].country);
   };
 
   const openEditItem = (item: MenuItem) => {

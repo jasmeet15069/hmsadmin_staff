@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useRooms } from '@/hooks/useRooms';
+import { useHotelBranding } from '@/hooks/useHotelBranding';
 import { Plus, Filter, Loader2, RefreshCw, Trash2 } from 'lucide-react';
 
 type RoomStatus = 'available' | 'occupied' | 'maintenance' | 'cleaning';
@@ -25,6 +26,7 @@ const COUNTRY_OPTIONS = [
 ];
 
 export default function RoomsPage() {
+  const { branding } = useHotelBranding();
   const { rooms, stats, isLoading, refetch, createRoom, updateRoom, deleteRoom } = useRooms();
   const [selectedRoom, setSelectedRoom] = useState<typeof rooms[0] | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -45,6 +47,13 @@ export default function RoomsPage() {
   const selectedCountry = COUNTRY_OPTIONS.find(option => option.country === selectedCountryName) || COUNTRY_OPTIONS[0];
 
   useEffect(() => {
+    const option =
+      COUNTRY_OPTIONS.find(item => item.country === branding.country) ||
+      COUNTRY_OPTIONS.find(item => item.currency === branding.currency);
+    if (option) setSelectedCountryName(option.country);
+  }, [branding.country, branding.currency]);
+
+  useEffect(() => {
     let cancelled = false;
 
     if (selectedCountry.currency === 'USD') {
@@ -56,7 +65,7 @@ export default function RoomsPage() {
 
     setIsRateLoading(true);
     setRateError(null);
-    fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8787/api'}/exchange-rate?base=USD&target=${selectedCountry.currency}`)
+    fetch(`${import.meta.env.VITE_API_URL || '/api'}/exchange-rate?base=USD&target=${selectedCountry.currency}`)
       .then(response => response.json())
       .then(payload => {
         if (cancelled) return;
@@ -93,7 +102,6 @@ export default function RoomsPage() {
     if (success) {
       setIsCreateOpen(false);
       setNewRoom({ room_number: '', room_type: 'Standard', floor: 1, capacity: 2, price_per_night: 150 });
-      setSelectedCountryName(COUNTRY_OPTIONS[0].country);
     }
   };
 

@@ -6,15 +6,16 @@ import { useOrders } from '@/hooks/useOrders';
 import { cn } from '@/lib/utils';
 import { Clock, User, MapPin, ChevronRight, AlertTriangle, Loader2, RefreshCw, Trash2 } from 'lucide-react';
 
-type OrderStatus = 'pending' | 'confirmed' | 'preparing' | 'ready';
+type OrderStatus = 'pending' | 'preparing' | 'ready' | 'delivered' | 'cancelled';
 
-const statusFlow: OrderStatus[] = ['pending', 'confirmed', 'preparing', 'ready'];
+const statusFlow: OrderStatus[] = ['pending', 'preparing', 'ready'];
 
 export default function KitchenQueue() {
   const { orders, isLoading, refetch, updateOrderStatus, deleteOrder } = useOrders();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const activeOrders = orders.filter(order => statusFlow.includes(order.status as OrderStatus));
+  const historyOrders = orders.filter(order => ['delivered', 'cancelled'].includes(order.status));
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -38,8 +39,7 @@ export default function KitchenQueue() {
 
   const getNextAction = (status: OrderStatus): string => {
     switch (status) {
-      case 'pending': return 'Confirm Order';
-      case 'confirmed': return 'Begin Cooking';
+      case 'pending': return 'Begin Preparing';
       case 'preparing': return 'Mark Ready';
       default: return 'Done';
     }
@@ -47,8 +47,7 @@ export default function KitchenQueue() {
 
   const columns: { status: OrderStatus; label: string }[] = [
     { status: 'pending', label: 'New Orders' },
-    { status: 'confirmed', label: 'Confirmed' },
-    { status: 'preparing', label: 'Cooking' },
+    { status: 'preparing', label: 'Preparing' },
     { status: 'ready', label: 'Ready for Pickup' },
   ];
 
@@ -81,7 +80,7 @@ export default function KitchenQueue() {
           </div>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-4">
+        <div className="grid gap-4 lg:grid-cols-3">
           {columns.map(column => {
             const columnOrders = activeOrders.filter(o => o.status === column.status);
 
@@ -185,6 +184,26 @@ export default function KitchenQueue() {
               </div>
             );
           })}
+        </div>
+
+        <div className="space-y-3">
+          <h3 className="font-bold">History</h3>
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {historyOrders.slice(0, 6).map(order => (
+              <div key={order.id} className="flex items-center justify-between border-2 p-3">
+                <div>
+                  <p className="font-mono font-bold">#{order.order_number}</p>
+                  <p className="text-sm text-muted-foreground">Room {order.rooms?.room_number || 'N/A'}</p>
+                </div>
+                <OrderStatusBadge status={order.status as OrderStatus} />
+              </div>
+            ))}
+            {historyOrders.length === 0 && (
+              <div className="border-2 border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+                Delivered and cancelled orders will appear here.
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </DashboardLayout>

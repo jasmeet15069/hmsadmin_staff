@@ -28,7 +28,7 @@ type OrderSpec = {
   ascending: boolean;
 };
 
-const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8787/api').replace(/\/$/, '');
+const API_URL = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '');
 const SESSION_KEY = 'hotel_harmony_session';
 
 async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<ApiResult<T>> {
