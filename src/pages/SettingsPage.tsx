@@ -76,10 +76,20 @@ const defaultPaymentSettings: PaymentSettings = {
 };
 
 async function apiJSON<T>(path: string, options: RequestInit = {}): Promise<T> {
+  let authHeader = {};
+  try {
+    const rawSession = localStorage.getItem('hotel_harmony_session');
+    const session = rawSession ? JSON.parse(rawSession) : null;
+    if (session?.access_token) authHeader = { Authorization: `Bearer ${session.access_token}` };
+  } catch {
+    authHeader = {};
+  }
+
   const response = await fetch(`${API_BASE}${path}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
+      ...authHeader,
       ...(options.headers || {}),
     },
   });
