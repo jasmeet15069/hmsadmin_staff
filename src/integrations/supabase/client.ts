@@ -31,12 +31,18 @@ type OrderSpec = {
 const API_URL = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '');
 const SESSION_KEY = 'hotel_harmony_session';
 
+function authHeader(): Record<string, string> {
+  const session = readSession();
+  return session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {};
+}
+
 async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<ApiResult<T>> {
   try {
     const response = await fetch(`${API_URL}${path}`, {
       ...options,
       headers: {
         'Content-Type': 'application/json',
+        ...authHeader(),
         ...(options.headers || {}),
       },
     });

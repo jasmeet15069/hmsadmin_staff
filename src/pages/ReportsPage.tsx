@@ -7,6 +7,16 @@ const apiBase = import.meta.env.VITE_API_URL || '/api';
 
 type ReportData = Record<string, unknown>;
 
+const authHeaders = () => {
+  try {
+    const rawSession = localStorage.getItem('hotel_harmony_session');
+    const session = rawSession ? JSON.parse(rawSession) : null;
+    return session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {};
+  } catch {
+    return {};
+  }
+};
+
 const reports = [
   { key: 'occupancy', title: 'Occupancy' },
   { key: 'revenue', title: 'Revenue' },
@@ -24,7 +34,9 @@ export default function ReportsPage() {
     setIsLoading(true);
     const entries = await Promise.all(
       reports.map(async report => {
-        const response = await fetch(`${apiBase}/reports/${report.key}`);
+        const response = await fetch(`${apiBase}/reports/${report.key}`, {
+          headers: authHeaders(),
+        });
         const payload = await response.json().catch(() => ({}));
         return [report.key, payload.data || {}] as const;
       }),
