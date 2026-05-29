@@ -35,6 +35,7 @@ export interface RolePortalPreset {
 
 export const STAFF_NAV_ITEMS: StaffNavItem[] = [
   { id: 'dashboard', label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['platform_admin', 'hotel_admin', 'property_manager', 'receptionist', 'super_admin', 'admin', 'food_manager', 'kitchen_manager', 'waiter'] },
+  { id: 'staff', label: 'Staff', href: '/staff', icon: UserCog, roles: ['platform_admin', 'hotel_admin', 'super_admin'] },
   { id: 'rooms', label: 'Rooms', href: '/rooms', icon: Bed, roles: ['platform_admin', 'hotel_admin', 'property_manager', 'receptionist', 'super_admin', 'admin'] },
   { id: 'guests', label: 'Guests / Bookings', href: '/guests', icon: Users, roles: ['platform_admin', 'hotel_admin', 'property_manager', 'receptionist', 'super_admin', 'admin'] },
   { id: 'housekeeping', label: 'Housekeeping', href: '/housekeeping', icon: ClipboardCheck, roles: ['platform_admin', 'hotel_admin', 'property_manager', 'housekeeping', 'super_admin'] },
@@ -46,7 +47,6 @@ export const STAFF_NAV_ITEMS: StaffNavItem[] = [
   { id: 'order_queue', label: 'Order Queue', href: '/kitchen', icon: ChefHat, roles: ['platform_admin', 'hotel_admin', 'property_manager', 'super_admin', 'kitchen_manager', 'waiter'] },
   { id: 'reports', label: 'Reports', href: '/reports', icon: BarChart3, roles: ['platform_admin', 'hotel_admin', 'property_manager', 'super_admin'] },
   { id: 'settings', label: 'Settings', href: '/settings', icon: Settings, roles: ['platform_admin', 'hotel_admin', 'super_admin'] },
-  { id: 'staff', label: 'Staff', href: '/staff', icon: UserCog, roles: ['platform_admin', 'hotel_admin', 'super_admin'] },
   { id: 'platform', label: 'Platform', href: '/platform', icon: ShieldCheck, roles: ['platform_admin'] },
 ];
 
