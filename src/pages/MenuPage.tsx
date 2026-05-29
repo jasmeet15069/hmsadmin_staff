@@ -259,8 +259,8 @@ export default function MenuPage() {
                   Add Item
                 </Button>
               </DialogTrigger>
-              <DialogContent className="border-2">
-                <DialogHeader>
+              <DialogContent className="border-2 sm:max-w-2xl lg:max-w-3xl">
+                <DialogHeader className="pr-8">
                   <DialogTitle>{editingItem ? 'Edit Item' : 'Add New Item'}</DialogTitle>
                 </DialogHeader>
                 <form className="space-y-4" onSubmit={handleSave}>
@@ -321,7 +321,7 @@ export default function MenuPage() {
                       </Select>
                     </div>
                     <div className="space-y-3 sm:col-span-2">
-                      <div className="flex items-center justify-between">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
                         <Label>Customization Options</Label>
                         <Button type="button" variant="outline" size="sm" onClick={addCustomization}>
                           <Plus className="mr-2 h-4 w-4" />
@@ -330,9 +330,9 @@ export default function MenuPage() {
                       </div>
                       <div className="space-y-2">
                         {customizations.map(option => (
-                          <div key={option.id} className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_120px_auto_auto]">
+                          <div key={option.id} className="grid grid-cols-[minmax(0,1fr)_88px_44px_44px] gap-2 max-[520px]:grid-cols-[minmax(0,1fr)_44px_44px]">
                             <Input
-                              className="border-2"
+                              className="min-w-0 border-2 max-[520px]:col-span-3"
                               value={option.name}
                               placeholder="Extra sauce"
                               onChange={event => updateCustomization(option.id, { name: event.target.value })}
@@ -383,11 +383,11 @@ export default function MenuPage() {
                     )}
                     {form.is_available ? 'Visible to guests' : 'Hidden from guests'}
                   </Button>
-                  <div className="flex gap-2 pt-4">
+                  <div className="flex flex-col-reverse gap-2 pt-4 sm:flex-row">
                     <Button type="submit" className="flex-1" disabled={!form.name || Number(form.price) <= 0 || isRateLoading}>
                       {editingItem ? 'Update Item' : 'Add Item'}
                     </Button>
-                    <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                    <Button type="button" variant="outline" className="sm:w-28" onClick={() => setIsDialogOpen(false)}>
                       Cancel
                     </Button>
                   </div>
