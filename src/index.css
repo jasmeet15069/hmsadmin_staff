@@ -158,4 +158,16 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
   }
+
+  @media (min-width: 768px) {
+    html {
+      font-size: 15px;
+    }
+  }
+
+  @media (min-width: 1440px) {
+    html {
+      font-size: 14px;
+    }
+  }
 }

@@ -118,7 +118,7 @@ export default function Dashboard() {
           </div>
         )}
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(min(100%,22rem),1fr))]">
           {isAdmin && (
             <>
               <ClickableStatCard
@@ -178,7 +178,7 @@ export default function Dashboard() {
           )}
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-6 [grid-template-columns:repeat(auto-fit,minmax(min(100%,34rem),1fr))]">
           {showLiveOrders && activeOrders.length > 0 && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
