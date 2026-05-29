@@ -46,19 +46,28 @@ export function useRealtimeOrders(filterByGuest = false) {
           table: 'orders',
         },
         (payload) => {
+          if (!payload) {
+            fetchOrders();
+            return;
+          }
           if (payload.eventType === 'INSERT') {
+            if (!payload.new) return;
             const newOrder = payload.new as Order;
             if (!filterByGuest || newOrder.guest_id === user?.id) {
               setOrders(prev => [newOrder, ...prev]);
             }
           } else if (payload.eventType === 'UPDATE') {
+            if (!payload.new) return;
             const updatedOrder = payload.new as Order;
             setOrders(prev =>
               prev.map(order => (order.id === updatedOrder.id ? updatedOrder : order))
             );
           } else if (payload.eventType === 'DELETE') {
+            if (!payload.old) return;
             const deletedOrder = payload.old as Order;
             setOrders(prev => prev.filter(order => order.id !== deletedOrder.id));
+          } else {
+            fetchOrders();
           }
         }
       )

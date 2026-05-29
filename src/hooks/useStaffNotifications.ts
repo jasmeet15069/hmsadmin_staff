@@ -65,6 +65,7 @@ export function useStaffNotifications() {
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'orders' },
         (payload) => {
+          if (!payload?.new) return;
           const order = payload.new as Order;
           addNotification({
             type: 'new_order',
@@ -78,6 +79,7 @@ export function useStaffNotifications() {
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'orders' },
         (payload) => {
+          if (!payload?.new || !payload?.old) return;
           const order = payload.new as Order;
           const oldOrder = payload.old as Order;
           
@@ -100,6 +102,7 @@ export function useStaffNotifications() {
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'complaints' },
         (payload) => {
+          if (!payload?.new) return;
           const complaint = payload.new as Complaint;
           
           if (complaint.priority === 'critical') {
