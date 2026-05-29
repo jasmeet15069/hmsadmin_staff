@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ROLE_LABELS } from '@/types/auth';
 import { COUNTRY_OPTIONS, getCountryOption } from '@/lib/currency';
+import { applyAdminBrandTheme } from '@/hooks/useHotelBranding';
 import {
   BadgeIndianRupee,
   Bell,
@@ -125,6 +126,8 @@ export default function SettingsPage() {
     hotel_name: 'HotelOps',
     logo_url: '',
     primary_color: '#000000',
+    admin_primary_color: '#000000',
+    client_primary_color: '#000000',
     welcome_message: '',
     footer_text: '',
   });
@@ -154,6 +157,8 @@ export default function SettingsPage() {
           hotel_name: String(brandingData.hotel_name || 'HotelOps'),
           logo_url: String(brandingData.logo_url || ''),
           primary_color: String(brandingData.primary_color || '#000000'),
+          admin_primary_color: String(brandingData.admin_primary_color || brandingData.primary_color || '#000000'),
+          client_primary_color: String(brandingData.client_primary_color || brandingData.primary_color || '#000000'),
           welcome_message: String(brandingData.welcome_message || ''),
           footer_text: String(brandingData.footer_text || ''),
         });
@@ -221,7 +226,9 @@ export default function SettingsPage() {
           hotel_id: branding.hotel_id,
           hotel_name: branding.hotel_name,
           logo_url: branding.logo_url || null,
-          primary_color: branding.primary_color || '#000000',
+          primary_color: branding.admin_primary_color || branding.primary_color || '#000000',
+          admin_primary_color: branding.admin_primary_color || branding.primary_color || '#000000',
+          client_primary_color: branding.client_primary_color || branding.primary_color || '#000000',
           welcome_message: branding.welcome_message || null,
           footer_text: branding.footer_text || null,
         }),
@@ -235,8 +242,14 @@ export default function SettingsPage() {
         hotel_name: String(nextBranding.hotel_name || branding.hotel_name),
         logo_url: String(nextBranding.logo_url || branding.logo_url || ''),
         primary_color: String(nextBranding.primary_color || branding.primary_color || '#000000'),
+        admin_primary_color: String(nextBranding.admin_primary_color || nextBranding.primary_color || branding.admin_primary_color || '#000000'),
+        client_primary_color: String(nextBranding.client_primary_color || nextBranding.primary_color || branding.client_primary_color || '#000000'),
         welcome_message: String(nextBranding.welcome_message || branding.welcome_message || ''),
         footer_text: String(nextBranding.footer_text || branding.footer_text || ''),
+      });
+      applyAdminBrandTheme({
+        primary_color: String(nextBranding.primary_color || branding.primary_color || '#000000'),
+        admin_primary_color: String(nextBranding.admin_primary_color || nextBranding.primary_color || branding.admin_primary_color || '#000000'),
       });
       setPayment({ ...payment, ...nextPayment });
       sessionStorage.removeItem('hotel_branding');
@@ -365,7 +378,7 @@ export default function SettingsPage() {
                     <Building2 className="h-5 w-5" />
                     Guest and Staff Portal Branding
                   </CardTitle>
-                  <CardDescription>These values are shared by the client and admin portals.</CardDescription>
+                  <CardDescription>Set shared hotel identity and separate colors for each portal.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid gap-4 sm:grid-cols-2">
@@ -379,22 +392,41 @@ export default function SettingsPage() {
                       />
                     </div>
                     <div>
-                      <Label>Primary Color</Label>
+                      <Label>Admin Portal Color</Label>
                       <div className="mt-1 flex gap-2">
                         <Input
                           type="color"
-                          value={branding.primary_color}
-                          onChange={(event) => setBranding({ ...branding, primary_color: event.target.value })}
+                          value={branding.admin_primary_color}
+                          onChange={(event) => setBranding({ ...branding, admin_primary_color: event.target.value, primary_color: event.target.value })}
                           className="h-10 w-16 border-2 p-1"
-                          aria-label="Primary color"
+                          aria-label="Admin portal color"
                         />
                         <Input
-                          value={branding.primary_color}
-                          onChange={(event) => setBranding({ ...branding, primary_color: event.target.value })}
+                          value={branding.admin_primary_color}
+                          onChange={(event) => setBranding({ ...branding, admin_primary_color: event.target.value, primary_color: event.target.value })}
                           className="border-2"
                           placeholder="#000000"
                         />
                       </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label>Client Portal Color</Label>
+                    <div className="mt-1 flex gap-2">
+                      <Input
+                        type="color"
+                        value={branding.client_primary_color}
+                        onChange={(event) => setBranding({ ...branding, client_primary_color: event.target.value })}
+                        className="h-10 w-16 border-2 p-1"
+                        aria-label="Client portal color"
+                      />
+                      <Input
+                        value={branding.client_primary_color}
+                        onChange={(event) => setBranding({ ...branding, client_primary_color: event.target.value })}
+                        className="border-2"
+                        placeholder="#000000"
+                      />
                     </div>
                   </div>
 
@@ -474,29 +506,48 @@ export default function SettingsPage() {
                   <CardDescription>How the portals will introduce this hotel.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="border-2 p-4" style={{ borderColor: branding.primary_color }}>
-                    <div className="flex items-center gap-3">
-                      {branding.logo_url ? (
-                        <img src={branding.logo_url} alt="" className="h-12 w-12 border-2 object-cover" />
-                      ) : (
-                        <div className="flex h-12 w-12 items-center justify-center border-2" style={{ borderColor: branding.primary_color }}>
-                          <Building2 className="h-6 w-6" />
+                  <div className="space-y-4">
+                    <div className="border-2 p-4" style={{ borderColor: branding.admin_primary_color }}>
+                      <div className="mb-3 text-sm font-bold">Admin Portal</div>
+                      <div className="flex items-center gap-3">
+                        {branding.logo_url ? (
+                          <img src={branding.logo_url} alt="" className="h-12 w-12 border-2 object-cover" />
+                        ) : (
+                          <div className="flex h-12 w-12 items-center justify-center border-2" style={{ borderColor: branding.admin_primary_color }}>
+                            <Building2 className="h-6 w-6" />
+                          </div>
+                        )}
+                        <div>
+                          <div className="font-bold">{branding.hotel_name}</div>
+                          <div className="text-sm text-muted-foreground">{branding.welcome_message || 'Welcome'}</div>
                         </div>
-                      )}
-                      <div>
-                        <div className="font-bold">{branding.hotel_name}</div>
-                        <div className="text-sm text-muted-foreground">{branding.welcome_message || 'Welcome'}</div>
+                      </div>
+                      <Separator className="my-4" />
+                      <div className="grid gap-2 text-sm">
+                        <div className="flex items-center justify-between">
+                          <span>Default currency</span>
+                          <strong>{payment.default_currency}</strong>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span>Gateway</span>
+                          <strong className="capitalize">{payment.active_gateway.replace('_', ' ')}</strong>
+                        </div>
                       </div>
                     </div>
-                    <Separator className="my-4" />
-                    <div className="grid gap-2 text-sm">
-                      <div className="flex items-center justify-between">
-                        <span>Default currency</span>
-                        <strong>{payment.default_currency}</strong>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span>Gateway</span>
-                        <strong className="capitalize">{payment.active_gateway.replace('_', ' ')}</strong>
+                    <div className="border-2 p-4" style={{ borderColor: branding.client_primary_color }}>
+                      <div className="mb-3 text-sm font-bold">Client Portal</div>
+                      <div className="flex items-center gap-3">
+                        {branding.logo_url ? (
+                          <img src={branding.logo_url} alt="" className="h-12 w-12 border-2 object-cover" />
+                        ) : (
+                          <div className="flex h-12 w-12 items-center justify-center border-2" style={{ borderColor: branding.client_primary_color }}>
+                            <Building2 className="h-6 w-6" />
+                          </div>
+                        )}
+                        <div>
+                          <div className="font-bold">{branding.hotel_name}</div>
+                          <div className="text-sm text-muted-foreground">{branding.welcome_message || 'Welcome'}</div>
+                        </div>
                       </div>
                     </div>
                   </div>

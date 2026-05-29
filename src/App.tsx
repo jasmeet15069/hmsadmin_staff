@@ -21,6 +21,7 @@ import ReportsPage from "./pages/ReportsPage";
 import PlatformPage from "./pages/PlatformPage";
 import NotFound from "./pages/NotFound";
 import { defaultPortalPath } from "@/lib/rolePortal";
+import { useHotelBranding } from "@/hooks/useHotelBranding";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +59,8 @@ function StaffRoute({ children, roles = STAFF_ROLES }: { children: React.ReactNo
 }
 
 function AppRoutes() {
+  useHotelBranding();
+
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/staff-login" replace />} />
