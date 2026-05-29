@@ -12,9 +12,12 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { ROLE_LABELS } from '@/types/auth';
+import { AppRole, ROLE_LABELS } from '@/types/auth';
 import { COUNTRY_OPTIONS, getCountryOption } from '@/lib/currency';
 import { applyAdminBrandTheme } from '@/hooks/useHotelBranding';
+import { useRolePortalSettings, RolePortalSetting, RolePortalSettingsMap } from '@/hooks/useRolePortalSettings';
+import { moduleIDByPath, navItemByID, ROLE_PORTAL_ROLES, rolePortalPreset } from '@/lib/staffNavigation';
+import { cn } from '@/lib/utils';
 import {
   BadgeIndianRupee,
   Bell,
@@ -135,12 +138,99 @@ export default function SettingsPage() {
   const [stripeSecretKey, setStripeSecretKey] = useState('');
   const [stripeWebhookSecret, setStripeWebhookSecret] = useState('');
   const [razorpaySecret, setRazorpaySecret] = useState('');
+  const [selectedRole, setSelectedRole] = useState<AppRole>('super_admin');
+  const [roleDrafts, setRoleDrafts] = useState<RolePortalSettingsMap>({});
+  const [isSavingRolePortal, setIsSavingRolePortal] = useState(false);
+  const {
+    settings: rolePortalSettings,
+    isLoading: isLoadingRolePortals,
+    saveRoleSettings,
+  } = useRolePortalSettings();
 
   const primaryRole = user?.roles.find(r => r !== 'guest') || user?.roles[0] || 'guest';
   const selectedCountry = useMemo(
     () => getCountryOption(payment.country, payment.default_currency),
     [payment.country, payment.default_currency],
   );
+
+  useEffect(() => {
+    setRoleDrafts(rolePortalSettings);
+  }, [rolePortalSettings]);
+
+  const selectedRoleSetting = useMemo<RolePortalSetting>(() => {
+    const preset = rolePortalPreset(selectedRole);
+    return {
+      role: selectedRole,
+      label: preset.title,
+      description: preset.description,
+      default_path: preset.defaultPath,
+      visible_modules: [...preset.modules],
+      ...roleDrafts[selectedRole],
+    };
+  }, [roleDrafts, selectedRole]);
+
+  const availableRoleNav = useMemo(
+    () => rolePortalPreset(selectedRole).modules
+      .map(navItemByID)
+      .filter((item): item is NonNullable<ReturnType<typeof navItemByID>> => Boolean(item)),
+    [selectedRole],
+  );
+
+  const selectedVisibleModules = useMemo(() => new Set(selectedRoleSetting.visible_modules), [selectedRoleSetting.visible_modules]);
+
+  const updateSelectedRoleDraft = (changes: Partial<RolePortalSetting>) => {
+    setRoleDrafts(prev => ({
+      ...prev,
+      [selectedRole]: {
+        ...selectedRoleSetting,
+        ...changes,
+      },
+    }));
+  };
+
+  const toggleRoleModule = (moduleID: string, checked: boolean) => {
+    let nextModules = checked
+      ? Array.from(new Set([...selectedRoleSetting.visible_modules, moduleID]))
+      : selectedRoleSetting.visible_modules.filter(id => id !== moduleID);
+    if (nextModules.length === 0) {
+      nextModules = [rolePortalPreset(selectedRole).modules[0]].filter(Boolean);
+    }
+    const defaultModuleID = moduleIDByPath(selectedRoleSetting.default_path);
+    const defaultStillVisible = defaultModuleID && nextModules.includes(defaultModuleID);
+    const nextDefaultPath = defaultStillVisible
+      ? selectedRoleSetting.default_path
+      : navItemByID(nextModules[0])?.href || rolePortalPreset(selectedRole).defaultPath;
+    updateSelectedRoleDraft({ visible_modules: nextModules, default_path: nextDefaultPath });
+  };
+
+  const resetSelectedRoleDraft = () => {
+    const preset = rolePortalPreset(selectedRole);
+    updateSelectedRoleDraft({
+      default_path: preset.defaultPath,
+      visible_modules: [...preset.modules],
+    });
+  };
+
+  const handleSaveRolePortal = async () => {
+    setIsSavingRolePortal(true);
+    try {
+      const saved = await saveRoleSettings({
+        role: selectedRole,
+        default_path: selectedRoleSetting.default_path,
+        visible_modules: selectedRoleSetting.visible_modules,
+      });
+      setRoleDrafts(prev => ({ ...prev, [selectedRole]: saved }));
+      toast({ title: 'Role portal saved', description: `${saved.label || ROLE_LABELS[selectedRole]} navigation was updated.` });
+    } catch (error) {
+      toast({
+        title: 'Save failed',
+        description: error instanceof Error ? error.message : 'Unable to save role portal settings.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSavingRolePortal(false);
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -787,24 +877,118 @@ export default function SettingsPage() {
           </TabsContent>
 
           <TabsContent value="roles" className="space-y-6">
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {[
-                ['Hotel Admin', 'Full hotel setup, staff, payments, reports, and operations settings.'],
-                ['Receptionist', 'Arrivals, departures, room status, guest bookings, complaints, and payments.'],
-                ['Housekeeping', 'Room cleaning board, guest requests, inspection status, and room readiness.'],
-                ['Maintenance', 'Work orders, room issues, priorities, SLA follow-up, and resolution notes.'],
-                ['Food Manager', 'Menu, kitchen inventory, food complaints, suppliers, and stock health.'],
-                ['Kitchen Manager', 'Live order queue, preparing/ready workflow, and kitchen stock awareness.'],
-                ['Waiter', 'Ready orders, pickup/delivery actions, and active service queue.'],
-              ].map(([title, description]) => (
-                <Card key={title} className="border-2">
-                  <CardHeader>
-                    <CardTitle className="text-lg">{title}</CardTitle>
-                    <CardDescription>{description}</CardDescription>
-                  </CardHeader>
-                </Card>
-              ))}
-            </div>
+            <Card className="border-2">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <ShieldCheck className="h-5 w-5" />
+                  Role Portal Control Panel
+                </CardTitle>
+                <CardDescription>
+                  Choose the modules each staff role sees in the admin portal. Backend route permissions still protect restricted actions.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-5 lg:grid-cols-[260px_1fr]">
+                <div className="space-y-2">
+                  {ROLE_PORTAL_ROLES.map(role => {
+                    const setting = roleDrafts[role];
+                    const preset = rolePortalPreset(role);
+                    const isSelected = selectedRole === role;
+                    return (
+                      <button
+                        key={role}
+                        type="button"
+                        onClick={() => setSelectedRole(role)}
+                        className={cn(
+                          'w-full border-2 p-3 text-left transition-all',
+                          isSelected ? 'border-primary bg-primary text-primary-foreground shadow-xs' : 'border-border hover:bg-accent',
+                        )}
+                      >
+                        <div className="font-bold">{setting?.label || preset.title}</div>
+                        <div className={cn('mt-1 text-xs', isSelected ? 'text-primary-foreground/80' : 'text-muted-foreground')}>
+                          {(setting?.visible_modules || preset.modules).length} visible modules
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="space-y-5">
+                  <div className="grid gap-4 xl:grid-cols-[1fr_280px]">
+                    <div>
+                      <h3 className="text-xl font-bold">{selectedRoleSetting.label}</h3>
+                      <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{selectedRoleSetting.description}</p>
+                    </div>
+                    <div>
+                      <Label>Default Landing Page</Label>
+                      <Select
+                        value={selectedRoleSetting.default_path}
+                        onValueChange={(value) => updateSelectedRoleDraft({ default_path: value })}
+                      >
+                        <SelectTrigger className="mt-1 border-2">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableRoleNav
+                            .filter(item => selectedVisibleModules.has(item.id))
+                            .map(item => (
+                              <SelectItem key={item.id} value={item.href}>
+                                {item.label}
+                              </SelectItem>
+                            ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                    {availableRoleNav.map(item => {
+                      const Icon = item.icon;
+                      const checked = selectedVisibleModules.has(item.id);
+                      return (
+                        <div key={item.id} className="flex items-center justify-between gap-3 border-2 p-3">
+                          <div className="flex min-w-0 items-center gap-2">
+                            <Icon className="h-4 w-4 shrink-0" />
+                            <div className="min-w-0">
+                              <div className="truncate text-sm font-bold">{item.label}</div>
+                              <div className="truncate text-xs text-muted-foreground">{item.href}</div>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={checked}
+                            disabled={isLoadingRolePortals || (selectedRoleSetting.visible_modules.length === 1 && checked)}
+                            onCheckedChange={(next) => toggleRoleModule(item.id, next)}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="border-2 p-4">
+                    <div className="mb-3 text-sm font-bold">What this role sees</div>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedRoleSetting.visible_modules.map(moduleID => {
+                        const item = navItemByID(moduleID);
+                        return item ? (
+                          <span key={moduleID} className="border-2 px-2 py-1 text-xs font-medium">
+                            {item.label}
+                          </span>
+                        ) : null;
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-3">
+                    <Button onClick={handleSaveRolePortal} disabled={isSavingRolePortal || isLoadingRolePortals}>
+                      {isSavingRolePortal ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                      Save Role Portal
+                    </Button>
+                    <Button type="button" variant="outline" onClick={resetSelectedRoleDraft}>
+                      Reset Recommended
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="account" className="space-y-6">
