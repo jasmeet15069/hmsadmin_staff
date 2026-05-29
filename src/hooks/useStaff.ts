@@ -41,14 +41,29 @@ export function useStaff() {
 
       if (shiftsError) throw shiftsError;
 
-      // Filter to only staff members (non-guests)
-      const staffRoles = ['super_admin', 'admin', 'food_manager', 'kitchen_manager', 'waiter'];
-      const staffUserIds = roles
-        ?.filter(r => staffRoles.includes(r.role))
-        .map(r => r.user_id) || [];
+      // Filter to only operational staff members. Keep this list aligned with
+      // the role-specific portals in Settings > Role Portals.
+      const staffRoles = [
+        'platform_admin',
+        'hotel_admin',
+        'property_manager',
+        'receptionist',
+        'housekeeping',
+        'maintenance',
+        'super_admin',
+        'admin',
+        'food_manager',
+        'kitchen_manager',
+        'waiter',
+      ];
+      const staffUserIds = new Set(
+        roles
+          ?.filter(r => staffRoles.includes(r.role))
+          .map(r => r.user_id) || [],
+      );
 
       const staffMembers = profiles
-        ?.filter(p => staffUserIds.includes(p.user_id))
+        ?.filter(p => staffUserIds.has(p.user_id))
         .map(p => ({
           ...p,
           roles: roles?.filter(r => r.user_id === p.user_id) || [],
