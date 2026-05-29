@@ -262,6 +262,11 @@ export const supabase = {
     },
 
     async signOut() {
+      try {
+        await apiRequest('/auth/sign-out', { method: 'POST' });
+      } catch {
+        // Always clear local auth state even if the server is unreachable.
+      }
       writeSession(null);
       notifyAuth('SIGNED_OUT', null);
       return { error: null };
