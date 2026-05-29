@@ -215,10 +215,11 @@ export default function SettingsPage() {
   const handleSavePortal = async () => {
     setIsSavingPortal(true);
     try {
-      await apiJSON('/hotel/branding', {
+      const nextBranding = await apiJSON<Record<string, unknown>>('/hotel/branding', {
         method: 'PUT',
         body: JSON.stringify({
           hotel_id: branding.hotel_id,
+          hotel_name: branding.hotel_name,
           logo_url: branding.logo_url || null,
           primary_color: branding.primary_color || '#000000',
           welcome_message: branding.welcome_message || null,
@@ -228,6 +229,14 @@ export default function SettingsPage() {
       const nextPayment = await apiJSON<PaymentSettings>('/settings/payment', {
         method: 'PUT',
         body: JSON.stringify(buildPaymentPayload()),
+      });
+      setBranding({
+        ...branding,
+        hotel_name: String(nextBranding.hotel_name || branding.hotel_name),
+        logo_url: String(nextBranding.logo_url || branding.logo_url || ''),
+        primary_color: String(nextBranding.primary_color || branding.primary_color || '#000000'),
+        welcome_message: String(nextBranding.welcome_message || branding.welcome_message || ''),
+        footer_text: String(nextBranding.footer_text || branding.footer_text || ''),
       });
       setPayment({ ...payment, ...nextPayment });
       sessionStorage.removeItem('hotel_branding');
@@ -362,7 +371,12 @@ export default function SettingsPage() {
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
                       <Label>Hotel Name</Label>
-                      <Input value={branding.hotel_name} disabled className="mt-1 border-2" />
+                      <Input
+                        value={branding.hotel_name}
+                        onChange={(event) => setBranding({ ...branding, hotel_name: event.target.value })}
+                        className="mt-1 border-2"
+                        placeholder="The Grand Demo Hotel"
+                      />
                     </div>
                     <div>
                       <Label>Primary Color</Label>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
-import { BarChart3, Download, RefreshCw } from 'lucide-react';
+import { BarChart3, Download, Eye, RefreshCw } from 'lucide-react';
 
 const apiBase = import.meta.env.VITE_API_URL || '/api';
 
@@ -29,6 +29,7 @@ const reports = [
 export default function ReportsPage() {
   const [data, setData] = useState<Record<string, ReportData>>({});
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedReport, setSelectedReport] = useState(reports[0].key);
 
   const fetchReports = async () => {
     setIsLoading(true);
@@ -48,6 +49,10 @@ export default function ReportsPage() {
   useEffect(() => {
     fetchReports();
   }, []);
+
+  const activeReport = reports.find(report => report.key === selectedReport) || reports[0];
+  const activeData = data[activeReport.key] || {};
+  const activeRows = Object.entries(activeData).filter(([key]) => key !== 'report');
 
   return (
     <DashboardLayout>
@@ -74,6 +79,14 @@ export default function ReportsPage() {
                   <Download className="h-4 w-4" />
                 </Button>
               </div>
+              <Button
+                variant={selectedReport === report.key ? 'default' : 'outline'}
+                className="mb-4 w-full"
+                onClick={() => setSelectedReport(report.key)}
+              >
+                <Eye className="mr-2 h-4 w-4" />
+                Show Live Report
+              </Button>
               {isLoading ? (
                 <p className="text-sm text-muted-foreground">Loading...</p>
               ) : (
@@ -90,6 +103,38 @@ export default function ReportsPage() {
               )}
             </div>
           ))}
+        </div>
+
+        <div className="border-2 bg-card p-5">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 className="flex items-center gap-2 text-xl font-bold">
+                <BarChart3 className="h-5 w-5" />
+                {activeReport.title} Live View
+              </h3>
+              <p className="text-sm text-muted-foreground">This is the selected report shown directly on the website.</p>
+            </div>
+            <Button variant="outline" onClick={fetchReports}>
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Refresh
+            </Button>
+          </div>
+          {isLoading ? (
+            <p className="text-sm text-muted-foreground">Loading live report...</p>
+          ) : activeRows.length === 0 ? (
+            <div className="border-2 border-dashed p-8 text-center text-muted-foreground">
+              No live values available for this report yet.
+            </div>
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {activeRows.map(([key, value]) => (
+                <div key={key} className="border-2 p-4">
+                  <div className="text-sm capitalize text-muted-foreground">{key.replaceAll('_', ' ')}</div>
+                  <div className="mt-2 break-words font-mono text-2xl font-bold">{String(value ?? '-')}</div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </DashboardLayout>
