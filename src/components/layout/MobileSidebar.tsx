@@ -8,6 +8,7 @@ import { STAFF_NAV_ITEMS } from '@/lib/staffNavigation';
 import { primaryStaffRole } from '@/lib/rolePortal';
 
 const OWNER_MODULES = new Set(['settings', 'staff']);
+const ALWAYS_VISIBLE_STAFF_MODULES = new Set(['staff']);
 
 export function MobileSidebar() {
   const { user, hasAnyRole } = useAuth();
@@ -19,6 +20,7 @@ export function MobileSidebar() {
   const isOwner = ['platform_admin', 'hotel_admin', 'super_admin'].includes(primaryRole);
   const filteredNav = STAFF_NAV_ITEMS.filter(item => {
     if (!hasAnyRole(item.roles)) return false;
+    if (ALWAYS_VISIBLE_STAFF_MODULES.has(item.id)) return true;
     if (isOwner && OWNER_MODULES.has(item.id)) return true;
     return visibleModules.size === 0 || visibleModules.has(item.id);
   });

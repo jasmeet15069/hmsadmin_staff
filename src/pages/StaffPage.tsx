@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { useAuth } from '@/contexts/AuthContext';
 import { useStaff } from '@/hooks/useStaff';
 import { useStaffShifts } from '@/hooks/useStaffShifts';
 import { ROLE_LABELS } from '@/types/auth';
@@ -14,14 +15,18 @@ import { Users, Clock, Search, Loader2, LogIn, LogOut, Calendar } from 'lucide-r
 import { cn } from '@/lib/utils';
 
 export default function StaffPage() {
+  const { user, hasAnyRole } = useAuth();
   const { staff, isLoading, onDutyCount } = useStaff();
   const { shifts, clockIn, clockOut, myActiveShift } = useStaffShifts();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStaff, setSelectedStaff] = useState<typeof staff[0] | null>(null);
 
-  const filteredStaff = staff.filter(s =>
-    s.full_name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const canManageStaff = hasAnyRole(['platform_admin', 'super_admin', 'hotel_admin', 'receptionist', 'admin']);
+  const searchedStaff = staff.filter(s => s.full_name.toLowerCase().includes(searchQuery.toLowerCase()));
+  const visibleStaff = canManageStaff ? searchedStaff : staff.filter(s => s.user_id === user?.id);
+  const visibleShifts = canManageStaff ? shifts : shifts.filter(s => s.user_id === user?.id);
+  const myShiftCount = shifts.filter(s => s.user_id === user?.id).length;
+  const myLastShift = shifts.find(s => s.user_id === user?.id);
 
   const getStaffShifts = (userId: string) => {
     return shifts.filter(s => s.user_id === userId).slice(0, 10);
@@ -50,18 +55,19 @@ export default function StaffPage() {
       <div className="space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">Staff Management</h2>
+            <h2 className="text-2xl font-bold tracking-tight">
+              {canManageStaff ? 'Staff Management' : 'My Staff Session'}
+            </h2>
             <p className="text-muted-foreground">
-              {staff.length} staff members • {onDutyCount} on duty
+              {canManageStaff
+                ? `${staff.length} staff members - ${onDutyCount} on duty`
+                : 'Clock in, clock out, and review your own shift history'}
             </p>
           </div>
-          {/* Clock In/Out for current user */}
+
           <div>
             {myActiveShift ? (
-              <Button
-                variant="outline"
-                onClick={() => clockOut(myActiveShift.id)}
-              >
+              <Button variant="outline" onClick={() => clockOut(myActiveShift.id)}>
                 <LogOut className="mr-2 h-4 w-4" />
                 Clock Out ({formatDuration(myActiveShift.clock_in)})
               </Button>
@@ -74,59 +80,113 @@ export default function StaffPage() {
           </div>
         </div>
 
-        {/* Quick Stats */}
         <div className="grid gap-4 sm:grid-cols-3">
-          <Card className="border-2">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <Users className="h-8 w-8 text-primary" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Total Staff</p>
-                  <p className="text-2xl font-bold">{staff.length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="border-2 border-green-600 bg-green-50">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <Clock className="h-8 w-8 text-green-600" />
-                <div>
-                  <p className="text-sm text-green-800">Currently On Duty</p>
-                  <p className="text-2xl font-bold text-green-800">{onDutyCount}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="border-2">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <Calendar className="h-8 w-8 text-primary" />
-                <div>
-                  <p className="text-sm text-muted-foreground">Today's Shifts</p>
-                  <p className="text-2xl font-bold">
-                    {shifts.filter(s =>
-                      new Date(s.clock_in).toDateString() === new Date().toDateString()
-                    ).length}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {canManageStaff ? (
+            <>
+              <Card className="border-2">
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-4">
+                    <Users className="h-8 w-8 text-primary" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Total Staff</p>
+                      <p className="text-2xl font-bold">{staff.length}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="border-2 border-green-600 bg-green-50">
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-4">
+                    <Clock className="h-8 w-8 text-green-600" />
+                    <div>
+                      <p className="text-sm text-green-800">Currently On Duty</p>
+                      <p className="text-2xl font-bold text-green-800">{onDutyCount}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="border-2">
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-4">
+                    <Calendar className="h-8 w-8 text-primary" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Today's Shifts</p>
+                      <p className="text-2xl font-bold">
+                        {visibleShifts.filter(s =>
+                          new Date(s.clock_in).toDateString() === new Date().toDateString()
+                        ).length}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </>
+          ) : (
+            <>
+              <Card className={cn('border-2', myActiveShift && 'border-green-600 bg-green-50')}>
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-4">
+                    <Clock className={cn('h-8 w-8 text-primary', myActiveShift && 'text-green-600')} />
+                    <div>
+                      <p className="text-sm text-muted-foreground">My Status</p>
+                      <p className={cn('text-2xl font-bold', myActiveShift && 'text-green-800')}>
+                        {myActiveShift ? 'On Duty' : 'Off Duty'}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="border-2">
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-4">
+                    <Calendar className="h-8 w-8 text-primary" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">My Recorded Shifts</p>
+                      <p className="text-2xl font-bold">{myShiftCount}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="border-2">
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-4">
+                    <Users className="h-8 w-8 text-primary" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Last Shift</p>
+                      <p className="text-lg font-bold">
+                        {myLastShift ? formatDuration(myLastShift.clock_in, myLastShift.clock_out) : 'None'}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </>
+          )}
         </div>
 
-        {/* Search */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search staff..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="border-2 pl-9"
-          />
-        </div>
+        {!canManageStaff && (
+          <Card className="border-2">
+            <CardHeader>
+              <CardTitle className="text-base">Role Access</CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm text-muted-foreground">
+              This view is limited to your attendance. Receptionists and hotel admins can manage the full staff roster, on-duty status, and shift history.
+            </CardContent>
+          </Card>
+        )}
 
-        {/* Staff Table */}
+        {canManageStaff && (
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search staff..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="border-2 pl-9"
+            />
+          </div>
+        )}
+
         <div className="border-2 border-border">
           <Table>
             <TableHeader>
@@ -139,7 +199,7 @@ export default function StaffPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredStaff.map(member => (
+              {visibleStaff.map(member => (
                 <TableRow key={member.id} className="border-b">
                   <TableCell>
                     <div className="flex items-center gap-3">
@@ -187,7 +247,7 @@ export default function StaffPage() {
                       </DialogTrigger>
                       <DialogContent className="border-2 max-w-lg">
                         <DialogHeader>
-                          <DialogTitle>{member.full_name}'s Shifts</DialogTitle>
+                          <DialogTitle>{(selectedStaff || member).full_name}'s Shifts</DialogTitle>
                         </DialogHeader>
                         <div className="max-h-96 overflow-y-auto">
                           <Table>
@@ -234,10 +294,10 @@ export default function StaffPage() {
                   </TableCell>
                 </TableRow>
               ))}
-              {filteredStaff.length === 0 && (
+              {visibleStaff.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
-                    No staff members found
+                    {canManageStaff ? 'No staff members found' : 'Your staff profile was not found'}
                   </TableCell>
                 </TableRow>
               )}

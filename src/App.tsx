@@ -80,7 +80,7 @@ function AppRoutes() {
       <Route path="/complaints" element={<StaffRoute roles={['platform_admin', 'hotel_admin', 'property_manager', 'receptionist', 'super_admin', 'admin', 'food_manager']}><ComplaintsPage /></StaffRoute>} />
       <Route path="/reports" element={<StaffRoute roles={['platform_admin', 'hotel_admin', 'property_manager', 'super_admin']}><ReportsPage /></StaffRoute>} />
       <Route path="/settings" element={<StaffRoute roles={HOTEL_ADMIN_ROLES}><SettingsPage /></StaffRoute>} />
-      <Route path="/staff" element={<StaffRoute roles={HOTEL_ADMIN_ROLES}><StaffPage /></StaffRoute>} />
+      <Route path="/staff" element={<StaffRoute roles={STAFF_ROLES}><StaffPage /></StaffRoute>} />
       <Route path="/platform" element={<StaffRoute roles={['platform_admin']}><PlatformPage /></StaffRoute>} />
       
       <Route path="*" element={<NotFound />} />
