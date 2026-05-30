@@ -21,10 +21,11 @@ export default function StaffPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStaff, setSelectedStaff] = useState<typeof staff[0] | null>(null);
 
-  const canManageStaff = hasAnyRole(['platform_admin', 'super_admin', 'hotel_admin', 'receptionist', 'admin']);
+  const canMasterControl = hasAnyRole(['platform_admin', 'super_admin', 'hotel_admin', 'receptionist', 'admin']);
+  const canViewStaffAttendance = canMasterControl || hasAnyRole(['property_manager']);
   const searchedStaff = staff.filter(s => s.full_name.toLowerCase().includes(searchQuery.toLowerCase()));
-  const visibleStaff = canManageStaff ? searchedStaff : staff.filter(s => s.user_id === user?.id);
-  const visibleShifts = canManageStaff ? shifts : shifts.filter(s => s.user_id === user?.id);
+  const visibleStaff = canViewStaffAttendance ? searchedStaff : staff.filter(s => s.user_id === user?.id);
+  const visibleShifts = canViewStaffAttendance ? shifts : shifts.filter(s => s.user_id === user?.id);
   const myShiftCount = shifts.filter(s => s.user_id === user?.id).length;
   const myLastShift = shifts.find(s => s.user_id === user?.id);
 
@@ -56,12 +57,14 @@ export default function StaffPage() {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h2 className="text-2xl font-bold tracking-tight">
-              {canManageStaff ? 'Staff Management' : 'My Staff Session'}
+              {canMasterControl ? 'Staff Management' : canViewStaffAttendance ? 'Staff Attendance' : 'My Staff Session'}
             </h2>
             <p className="text-muted-foreground">
-              {canManageStaff
+              {canMasterControl
                 ? `${staff.length} staff members - ${onDutyCount} on duty`
-                : 'Clock in, clock out, and review your own shift history'}
+                : canViewStaffAttendance
+                  ? `${staff.length} staff members - ${onDutyCount} on duty. View-only attendance for property operations.`
+                  : 'Clock in, clock out, and review your own shift history'}
             </p>
           </div>
 
@@ -81,7 +84,7 @@ export default function StaffPage() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-3">
-          {canManageStaff ? (
+          {canViewStaffAttendance ? (
             <>
               <Card className="border-2">
                 <CardContent className="pt-6">
@@ -164,7 +167,7 @@ export default function StaffPage() {
           )}
         </div>
 
-        {!canManageStaff && (
+        {!canViewStaffAttendance && (
           <Card className="border-2">
             <CardHeader>
               <CardTitle className="text-base">Role Access</CardTitle>
@@ -175,7 +178,7 @@ export default function StaffPage() {
           </Card>
         )}
 
-        {canManageStaff && (
+        {canViewStaffAttendance && (
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -297,7 +300,7 @@ export default function StaffPage() {
               {visibleStaff.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
-                    {canManageStaff ? 'No staff members found' : 'Your staff profile was not found'}
+                    {canViewStaffAttendance ? 'No staff members found' : 'Your staff profile was not found'}
                   </TableCell>
                 </TableRow>
               )}

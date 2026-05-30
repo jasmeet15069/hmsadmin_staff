@@ -27,20 +27,20 @@ export function MobileSidebar() {
 
   return (
     <div className="flex h-full flex-col bg-sidebar">
-      <div className="flex h-14 items-center border-b-2 border-border px-4">
-        <h1 className="text-lg font-bold tracking-tight">HotelOps</h1>
+      <div className="flex h-12 items-center border-b-2 border-border px-3">
+        <h1 className="text-base font-bold tracking-tight">HotelOps</h1>
       </div>
       
-      <div className="border-b-2 border-border px-4 py-3">
-        <div className="text-xs font-medium text-muted-foreground">Signed in as</div>
+      <div className="border-b-2 border-border px-3 py-2">
+        <div className="text-[0.72rem] font-medium text-muted-foreground">Signed in as</div>
         <div className="truncate text-sm font-semibold">{user?.profile?.full_name || user?.email}</div>
         <div className="mt-1 inline-block bg-primary px-2 py-0.5 text-xs font-medium text-primary-foreground">
           {ROLE_LABELS[primaryRole]}
         </div>
       </div>
 
-      <nav className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-3">
-        <ul className="space-y-1">
+      <nav className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-2">
+        <ul className="space-y-0.5">
           {filteredNav.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.href;
@@ -51,7 +51,7 @@ export function MobileSidebar() {
                   <NavLink
                     to={item.href}
                     className={cn(
-                      'flex items-center gap-2.5 border-2 px-2.5 py-1.5 text-[0.82rem] font-medium transition-all',
+                      'flex items-center gap-2 border-2 px-2 py-1.5 text-[0.78rem] font-medium transition-all',
                       isActive
                         ? 'border-primary bg-primary text-primary-foreground shadow-xs'
                         : 'border-transparent hover:border-border hover:bg-accent'

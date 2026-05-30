@@ -39,7 +39,14 @@ type StaffRole =
   | 'waiter';
 const STAFF_ROLES: StaffRole[] = ['platform_admin', 'hotel_admin', 'property_manager', 'receptionist', 'housekeeping', 'maintenance', 'super_admin', 'admin', 'food_manager', 'kitchen_manager', 'waiter'];
 const HOTEL_ADMIN_ROLES: StaffRole[] = ['platform_admin', 'hotel_admin', 'super_admin'];
-const FRONT_DESK_ROLES: StaffRole[] = ['platform_admin', 'hotel_admin', 'property_manager', 'receptionist', 'super_admin', 'admin'];
+const OWNER_ROLES: StaffRole[] = ['platform_admin', 'hotel_admin', 'super_admin'];
+const PROPERTY_OPS_ROLES: StaffRole[] = [...OWNER_ROLES, 'property_manager'];
+const FRONT_DESK_ROLES: StaffRole[] = [...OWNER_ROLES, 'property_manager', 'receptionist', 'admin'];
+const PAYMENT_ROLES: StaffRole[] = [...OWNER_ROLES, 'receptionist', 'admin'];
+const DASHBOARD_ROLES: StaffRole[] = [...OWNER_ROLES, 'property_manager', 'receptionist', 'admin'];
+const FOOD_MANAGER_ROLES: StaffRole[] = [...OWNER_ROLES, 'food_manager'];
+const KITCHEN_ROLES: StaffRole[] = [...OWNER_ROLES, 'kitchen_manager', 'waiter'];
+const INVENTORY_ROLES: StaffRole[] = [...OWNER_ROLES, 'food_manager', 'kitchen_manager'];
 
 function StaffRoute({ children, roles = STAFF_ROLES }: { children: React.ReactNode; roles?: StaffRole[] }) {
   const { user, loading, hasAnyRole } = useAuth();
@@ -68,17 +75,17 @@ function AppRoutes() {
       <Route path="/staff-login" element={<AuthPage portal="staff" />} />
       
       {/* Staff Routes */}
-      <Route path="/dashboard" element={<StaffRoute><Dashboard /></StaffRoute>} />
+      <Route path="/dashboard" element={<StaffRoute roles={DASHBOARD_ROLES}><Dashboard /></StaffRoute>} />
       <Route path="/rooms" element={<StaffRoute roles={FRONT_DESK_ROLES}><RoomsPage /></StaffRoute>} />
       <Route path="/guests" element={<StaffRoute roles={FRONT_DESK_ROLES}><CheckInOutPage /></StaffRoute>} />
-      <Route path="/payments" element={<StaffRoute roles={FRONT_DESK_ROLES}><PaymentsPage /></StaffRoute>} />
-      <Route path="/housekeeping" element={<StaffRoute roles={['platform_admin', 'hotel_admin', 'property_manager', 'housekeeping', 'super_admin']}><HousekeepingPage /></StaffRoute>} />
-      <Route path="/maintenance" element={<StaffRoute roles={['platform_admin', 'hotel_admin', 'property_manager', 'maintenance', 'super_admin']}><MaintenancePage /></StaffRoute>} />
-      <Route path="/kitchen" element={<StaffRoute roles={['platform_admin', 'hotel_admin', 'property_manager', 'super_admin', 'kitchen_manager', 'waiter']}><KitchenQueue /></StaffRoute>} />
-      <Route path="/menu" element={<StaffRoute roles={['platform_admin', 'hotel_admin', 'property_manager', 'super_admin', 'food_manager']}><MenuPage /></StaffRoute>} />
-      <Route path="/inventory" element={<StaffRoute roles={['platform_admin', 'hotel_admin', 'property_manager', 'super_admin', 'food_manager', 'kitchen_manager']}><InventoryPage /></StaffRoute>} />
-      <Route path="/complaints" element={<StaffRoute roles={['platform_admin', 'hotel_admin', 'property_manager', 'receptionist', 'super_admin', 'admin', 'food_manager']}><ComplaintsPage /></StaffRoute>} />
-      <Route path="/reports" element={<StaffRoute roles={['platform_admin', 'hotel_admin', 'property_manager', 'super_admin']}><ReportsPage /></StaffRoute>} />
+      <Route path="/payments" element={<StaffRoute roles={PAYMENT_ROLES}><PaymentsPage /></StaffRoute>} />
+      <Route path="/housekeeping" element={<StaffRoute roles={[...PROPERTY_OPS_ROLES, 'housekeeping']}><HousekeepingPage /></StaffRoute>} />
+      <Route path="/maintenance" element={<StaffRoute roles={[...PROPERTY_OPS_ROLES, 'maintenance']}><MaintenancePage /></StaffRoute>} />
+      <Route path="/kitchen" element={<StaffRoute roles={KITCHEN_ROLES}><KitchenQueue /></StaffRoute>} />
+      <Route path="/menu" element={<StaffRoute roles={FOOD_MANAGER_ROLES}><MenuPage /></StaffRoute>} />
+      <Route path="/inventory" element={<StaffRoute roles={INVENTORY_ROLES}><InventoryPage /></StaffRoute>} />
+      <Route path="/complaints" element={<StaffRoute roles={PAYMENT_ROLES}><ComplaintsPage /></StaffRoute>} />
+      <Route path="/reports" element={<StaffRoute roles={PROPERTY_OPS_ROLES}><ReportsPage /></StaffRoute>} />
       <Route path="/settings" element={<StaffRoute roles={HOTEL_ADMIN_ROLES}><SettingsPage /></StaffRoute>} />
       <Route path="/staff" element={<StaffRoute roles={STAFF_ROLES}><StaffPage /></StaffRoute>} />
       <Route path="/platform" element={<StaffRoute roles={['platform_admin']}><PlatformPage /></StaffRoute>} />

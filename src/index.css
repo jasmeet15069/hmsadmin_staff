@@ -161,13 +161,13 @@ All colors MUST be HSL.
 
   @media (min-width: 768px) {
     html {
-      font-size: 14px;
+      font-size: 13.5px;
     }
   }
 
   @media (min-width: 1440px) {
     html {
-      font-size: 13.5px;
+      font-size: 13px;
     }
   }
 }
