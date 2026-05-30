@@ -19,9 +19,12 @@ import HousekeepingPage from "./pages/HousekeepingPage";
 import MaintenancePage from "./pages/MaintenancePage";
 import ReportsPage from "./pages/ReportsPage";
 import PlatformPage from "./pages/PlatformPage";
+import PlanLockedPage from "./pages/PlanLockedPage";
 import NotFound from "./pages/NotFound";
 import { defaultPortalPath } from "@/lib/rolePortal";
 import { useHotelBranding } from "@/hooks/useHotelBranding";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
+import { isModuleLockedForPlan } from "@/lib/planAccess";
 
 const queryClient = new QueryClient();
 
@@ -48,8 +51,9 @@ const FOOD_MANAGER_ROLES: StaffRole[] = [...OWNER_ROLES, 'food_manager'];
 const KITCHEN_ROLES: StaffRole[] = [...OWNER_ROLES, 'kitchen_manager', 'waiter'];
 const INVENTORY_ROLES: StaffRole[] = [...OWNER_ROLES, 'food_manager', 'kitchen_manager'];
 
-function StaffRoute({ children, roles = STAFF_ROLES }: { children: React.ReactNode; roles?: StaffRole[] }) {
+function StaffRoute({ children, roles = STAFF_ROLES, moduleID }: { children: React.ReactNode; roles?: StaffRole[]; moduleID?: string }) {
   const { user, loading, hasAnyRole } = useAuth();
+  const { limits, loading: planLoading } = usePlanLimits();
   
   if (loading) {
     return (
@@ -62,6 +66,14 @@ function StaffRoute({ children, roles = STAFF_ROLES }: { children: React.ReactNo
   if (!user) return <Navigate to="/staff-login" replace />;
   if (!hasAnyRole(STAFF_ROLES)) return <Navigate to="/client-login" replace />;
   if (!hasAnyRole(roles)) return <Navigate to={defaultPortalPath(user.roles)} replace />;
+  if (moduleID && planLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="animate-pulse text-lg font-medium">Checking plan...</div>
+      </div>
+    );
+  }
+  if (moduleID && isModuleLockedForPlan(moduleID, limits)) return <PlanLockedPage moduleID={moduleID} />;
   return <>{children}</>;
 }
 
@@ -75,19 +87,19 @@ function AppRoutes() {
       <Route path="/staff-login" element={<AuthPage portal="staff" />} />
       
       {/* Staff Routes */}
-      <Route path="/dashboard" element={<StaffRoute roles={DASHBOARD_ROLES}><Dashboard /></StaffRoute>} />
-      <Route path="/rooms" element={<StaffRoute roles={FRONT_DESK_ROLES}><RoomsPage /></StaffRoute>} />
-      <Route path="/guests" element={<StaffRoute roles={FRONT_DESK_ROLES}><CheckInOutPage /></StaffRoute>} />
-      <Route path="/payments" element={<StaffRoute roles={PAYMENT_ROLES}><PaymentsPage /></StaffRoute>} />
-      <Route path="/housekeeping" element={<StaffRoute roles={[...PROPERTY_OPS_ROLES, 'housekeeping']}><HousekeepingPage /></StaffRoute>} />
-      <Route path="/maintenance" element={<StaffRoute roles={[...PROPERTY_OPS_ROLES, 'maintenance']}><MaintenancePage /></StaffRoute>} />
-      <Route path="/kitchen" element={<StaffRoute roles={KITCHEN_ROLES}><KitchenQueue /></StaffRoute>} />
-      <Route path="/menu" element={<StaffRoute roles={FOOD_MANAGER_ROLES}><MenuPage /></StaffRoute>} />
-      <Route path="/inventory" element={<StaffRoute roles={INVENTORY_ROLES}><InventoryPage /></StaffRoute>} />
-      <Route path="/complaints" element={<StaffRoute roles={PAYMENT_ROLES}><ComplaintsPage /></StaffRoute>} />
-      <Route path="/reports" element={<StaffRoute roles={PROPERTY_OPS_ROLES}><ReportsPage /></StaffRoute>} />
-      <Route path="/settings" element={<StaffRoute roles={HOTEL_ADMIN_ROLES}><SettingsPage /></StaffRoute>} />
-      <Route path="/staff" element={<StaffRoute roles={STAFF_ROLES}><StaffPage /></StaffRoute>} />
+      <Route path="/dashboard" element={<StaffRoute roles={DASHBOARD_ROLES} moduleID="dashboard"><Dashboard /></StaffRoute>} />
+      <Route path="/rooms" element={<StaffRoute roles={FRONT_DESK_ROLES} moduleID="rooms"><RoomsPage /></StaffRoute>} />
+      <Route path="/guests" element={<StaffRoute roles={FRONT_DESK_ROLES} moduleID="guests"><CheckInOutPage /></StaffRoute>} />
+      <Route path="/payments" element={<StaffRoute roles={PAYMENT_ROLES} moduleID="payments"><PaymentsPage /></StaffRoute>} />
+      <Route path="/housekeeping" element={<StaffRoute roles={[...PROPERTY_OPS_ROLES, 'housekeeping']} moduleID="housekeeping"><HousekeepingPage /></StaffRoute>} />
+      <Route path="/maintenance" element={<StaffRoute roles={[...PROPERTY_OPS_ROLES, 'maintenance']} moduleID="maintenance"><MaintenancePage /></StaffRoute>} />
+      <Route path="/kitchen" element={<StaffRoute roles={KITCHEN_ROLES} moduleID="order_queue"><KitchenQueue /></StaffRoute>} />
+      <Route path="/menu" element={<StaffRoute roles={FOOD_MANAGER_ROLES} moduleID="menu"><MenuPage /></StaffRoute>} />
+      <Route path="/inventory" element={<StaffRoute roles={INVENTORY_ROLES} moduleID="inventory"><InventoryPage /></StaffRoute>} />
+      <Route path="/complaints" element={<StaffRoute roles={PAYMENT_ROLES} moduleID="complaints"><ComplaintsPage /></StaffRoute>} />
+      <Route path="/reports" element={<StaffRoute roles={PROPERTY_OPS_ROLES} moduleID="reports"><ReportsPage /></StaffRoute>} />
+      <Route path="/settings" element={<StaffRoute roles={HOTEL_ADMIN_ROLES} moduleID="settings"><SettingsPage /></StaffRoute>} />
+      <Route path="/staff" element={<StaffRoute roles={STAFF_ROLES} moduleID="staff"><StaffPage /></StaffRoute>} />
       <Route path="/platform" element={<StaffRoute roles={['platform_admin']}><PlatformPage /></StaffRoute>} />
       
       <Route path="*" element={<NotFound />} />

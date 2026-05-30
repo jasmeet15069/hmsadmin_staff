@@ -11,9 +11,11 @@ import { COUNTRY_OPTIONS } from '@/lib/currency';
 import {
   Building2,
   CheckCircle2,
+  Ban,
   Database,
   Loader2,
   Mic2,
+  Power,
   Save,
   ShieldCheck,
   Sparkles,
@@ -200,6 +202,30 @@ export default function PlatformPage() {
     }
   };
 
+  const toggleTenantAccess = async (tenant: Tenant) => {
+    const nextPlan = planDrafts[tenant.id] || tenant.plan_tier;
+    setSavingTenantID(tenant.id);
+    try {
+      await apiJSON(`/platform/tenants/${tenant.id}/plan`, {
+        method: 'PUT',
+        body: JSON.stringify({ plan_tier: nextPlan, is_active: !tenant.is_active }),
+      });
+      toast({
+        title: tenant.is_active ? 'Client access paused' : 'Client access activated',
+        description: `${tenant.name} is now ${tenant.is_active ? 'paused' : 'active'}.`,
+      });
+      await load();
+    } catch (error) {
+      toast({
+        title: 'Access update failed',
+        description: error instanceof Error ? error.message : 'Unable to update client access.',
+        variant: 'destructive',
+      });
+    } finally {
+      setSavingTenantID(null);
+    }
+  };
+
   if (loading) {
     return (
       <DashboardLayout>
@@ -367,7 +393,7 @@ export default function PlatformPage() {
             </CardHeader>
             <CardContent className="space-y-3">
               {tenants.map(tenant => (
-                <div key={tenant.id} className="grid gap-3 border-2 p-3 lg:grid-cols-[1.1fr_1fr_220px] lg:items-center">
+                <div key={tenant.id} className="grid gap-3 border-2 p-3 lg:grid-cols-[1.1fr_1fr_240px] lg:items-center">
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
                       <h3 className="font-bold">{tenant.name}</h3>
@@ -417,6 +443,14 @@ export default function PlatformPage() {
                     >
                       {savingTenantID === tenant.id ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                       Apply Plan
+                    </Button>
+                    <Button
+                      variant={tenant.is_active ? 'destructive' : 'default'}
+                      onClick={() => toggleTenantAccess(tenant)}
+                      disabled={savingTenantID === tenant.id}
+                    >
+                      {tenant.is_active ? <Ban className="mr-2 h-4 w-4" /> : <Power className="mr-2 h-4 w-4" />}
+                      {tenant.is_active ? 'Pause Access' : 'Activate Access'}
                     </Button>
                   </div>
                 </div>

@@ -11,7 +11,8 @@ interface AuthPageProps {
 
 export default function AuthPage({ portal }: AuthPageProps) {
   const { user, loading, signOut } = useAuth();
-  const portalTitle = 'Staff Portal';
+  const isMasterHost = window.location.hostname.includes('hmsmasteradmin');
+  const portalTitle = isMasterHost ? 'Master Admin Portal' : 'Staff Portal';
 
   if (loading) {
     return (
@@ -23,6 +24,24 @@ export default function AuthPage({ portal }: AuthPageProps) {
 
   if (user) {
     const isGuestOnly = user.roles.includes('guest') && user.roles.length === 1;
+    if (isMasterHost && !user.roles.includes('platform_admin')) {
+      return (
+        <div className="flex min-h-screen items-center justify-center bg-background p-6">
+          <div className="w-full max-w-md border-2 border-border p-6">
+            <h1 className="text-2xl font-bold">Master Admin Only</h1>
+            <p className="mt-2 text-muted-foreground">
+              This portal is reserved for the HotelOps platform owner account.
+            </p>
+            <div className="mt-6 flex gap-3">
+              <Button onClick={signOut}>Sign out</Button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    if (isMasterHost && user.roles.includes('platform_admin')) {
+      return <Navigate to="/platform" replace />;
+    }
     if (!isGuestOnly) {
       return <Navigate to={defaultPortalPath(user.roles)} replace />;
     }
@@ -56,12 +75,15 @@ export default function AuthPage({ portal }: AuthPageProps) {
         
         <div className="space-y-6">
           <blockquote className="text-xl font-medium leading-relaxed text-primary-foreground">
-            "Role-specific portals for reception, housekeeping, maintenance, kitchen, payments, reporting, and hotel administration."
+            {isMasterHost
+              ? '"Control every client hotel, plan, access limit, role entitlement, and SaaS tenant from one master console."'
+              : '"Role-specific portals for reception, housekeeping, maintenance, kitchen, payments, reporting, and hotel administration."'}
           </blockquote>
           <div className="space-y-1">
             <p className="font-bold text-primary-foreground">{portalTitle}</p>
             <p className="text-primary-foreground/80">
               Designed for hotel staff.
+              {isMasterHost ? ' Platform owner access only.' : ''}
             </p>
           </div>
         </div>
