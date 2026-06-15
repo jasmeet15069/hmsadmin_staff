@@ -18,10 +18,20 @@ const PRO_MODULES = new Set([
   'inventory',
   'order_queue',
   'reports',
+  'pos',
+  'users',
+  'revenue',
+  'procurement',
+  'crm',
+  'channels',
+  'night-audit',
+  'booking-engine',
 ]);
 
 const PREMIUM_MODULES = new Set([
   ...PRO_MODULES,
+  'multi-property',
+  'platform',
   'ai_voice_agent',
   'ai_voice_booking',
 ]);
