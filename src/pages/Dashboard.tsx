@@ -14,7 +14,8 @@ import GuestDashboard from '@/pages/guest/GuestDashboard';
 import {
   Bed, UtensilsCrossed, Clock, Users, ChefHat, Truck, Loader2, RefreshCw,
   AlertTriangle, Settings, DollarSign, Building2, TrendingUp, Calendar,
-  ArrowRight, UserPlus, FileText, ClipboardCheck
+  ArrowRight, UserPlus, FileText, ClipboardCheck, Mail, Bell, Wrench,
+  Star, BarChart3, Percent, Home, ListChecks
 } from 'lucide-react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -181,6 +182,60 @@ export default function Dashboard() {
               <Button onClick={() => navigate('/reports')} variant="outline"><FileText className="h-4 w-4 mr-1" /> Reports</Button>
             </div>
 
+            {/* GM Operations Widgets */}
+            <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-4">
+              <Card>
+                <CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><Calendar className="h-4 w-4" />Today's Arrivals</CardTitle></CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-bold">{stats?.guests_checking_in_today || 0}</p>
+                  <div className="mt-2 space-y-1">
+                    {(charts?.arrivals_today || []).slice(0, 4).map((a: any, i: number) => (
+                      <div key={i} className="flex justify-between text-xs"><span>{a.guest_name}</span><span className="text-muted-foreground">Rm {a.room}</span></div>
+                    ))}
+                  </div>
+                  <Button variant="link" size="sm" className="mt-1 h-auto p-0" onClick={() => navigate('/guests')}>
+                    View all <ArrowRight className="ml-1 h-3 w-3" />
+                  </Button>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><LogOut className="h-4 w-4" />Today's Departures</CardTitle></CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-bold">{stats?.guests_checking_out_today || 0}</p>
+                  <div className="mt-2 space-y-1">
+                    {(charts?.departures_today || []).slice(0, 4).map((a: any, i: number) => (
+                      <div key={i} className="flex justify-between text-xs"><span>{a.guest_name}</span><span className="text-muted-foreground">Rm {a.room}</span></div>
+                    ))}
+                  </div>
+                  <Button variant="link" size="sm" className="mt-1 h-auto p-0" onClick={() => navigate('/guests')}>
+                    View all <ArrowRight className="ml-1 h-3 w-3" />
+                  </Button>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><Wrench className="h-4 w-4" />Maintenance</CardTitle></CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-bold text-orange-600">{roomStats.maintenance}</p>
+                  <p className="text-xs text-muted-foreground">rooms in maintenance</p>
+                  <Button variant="link" size="sm" className="mt-1 h-auto p-0" onClick={() => navigate('/maintenance')}>
+                    View tickets <ArrowRight className="ml-1 h-3 w-3" />
+                  </Button>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2"><CardTitle className="text-sm flex items-center gap-2"><ListChecks className="h-4 w-4" />Housekeeping</CardTitle></CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between">
+                    <div><p className="text-2xl font-bold">{roomStats.cleaning}</p><p className="text-xs text-muted-foreground">dirty rooms</p></div>
+                    <div><p className="text-2xl font-bold text-green-600">{roomStats.available}</p><p className="text-xs text-muted-foreground">ready</p></div>
+                  </div>
+                  <Button variant="link" size="sm" className="mt-1 h-auto p-0" onClick={() => navigate('/housekeeping')}>
+                    Assign cleaning <ArrowRight className="ml-1 h-3 w-3" />
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+
             {/* Charts row */}
             <div className="grid gap-6 lg:grid-cols-2">
               {/* Revenue Trend */}
@@ -239,59 +294,44 @@ export default function Dashboard() {
 
               {/* Today's Operations */}
               <Card>
-                <CardHeader><CardTitle className="text-base">Today's Operations</CardTitle></CardHeader>
+                <CardHeader><CardTitle className="text-base">Pending Payments</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">Check-ins</span>
-                        <Badge>{stats?.guests_checking_in_today || 0}</Badge>
-                      </div>
-                      <div className="space-y-1">
-                        {(charts?.arrivals_today || []).slice(0, 3).map((a: any, i: number) => (
-                          <div key={i} className="flex justify-between text-xs"><span>{a.guest_name}</span><span className="text-muted-foreground">Rm {a.room}</span></div>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-muted-foreground">Check-outs</span>
-                        <Badge variant="secondary">{stats?.guests_checking_out_today || 0}</Badge>
-                      </div>
-                      <div className="space-y-1">
-                        {(charts?.departures_today || []).slice(0, 3).map((a: any, i: number) => (
-                          <div key={i} className="flex justify-between text-xs"><span>{a.guest_name}</span><span className="text-muted-foreground">Rm {a.room}</span></div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="border-t pt-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Pending Payments</span>
-                      <Badge variant="outline">{(charts?.pending_payments || []).length}</Badge>
-                    </div>
-                    <div className="mt-2 space-y-1">
-                      {(charts?.pending_payments || []).slice(0, 4).map((p: any, i: number) => (
-                        <div key={i} className="flex justify-between text-xs">
-                          <span>{p.guest_name}</span>
-                          <span className="font-mono">{formatCurrency(p.amount)}</span>
+                  {(charts?.pending_payments || []).length === 0 ? (
+                    <p className="text-sm text-muted-foreground">No pending payments</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {(charts?.pending_payments || []).slice(0, 6).map((p: any, i: number) => (
+                        <div key={i} className="flex items-center justify-between border-b pb-2">
+                          <div>
+                            <p className="text-sm font-medium">{p.guest_name}</p>
+                            <p className="text-xs text-muted-foreground">Due {new Date(p.due_date).toLocaleDateString()}</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className={cn('font-mono font-bold text-sm', p.amount > 0 && 'text-destructive')}>
+                              {formatCurrency(p.amount)}
+                            </span>
+                            <Button size="sm" variant="ghost" className="h-7"><Mail className="h-3 w-3" /></Button>
+                          </div>
                         </div>
                       ))}
+                      <Button variant="link" size="sm" className="h-auto p-0" onClick={() => navigate('/payments')}>
+                        View all payments <ArrowRight className="ml-1 h-3 w-3" />
+                      </Button>
                     </div>
-                  </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
 
             {/* Recent Activity */}
             <Card>
-              <CardHeader><CardTitle className="text-base">Recent Activity</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="text-base flex items-center gap-2"><Bell className="h-4 w-4" />Recent Activity</CardTitle></CardHeader>
               <CardContent>
                 {(charts?.recent_activity || []).length === 0 ? (
                   <p className="text-sm text-muted-foreground">No recent activity</p>
                 ) : (
                   <div className="space-y-2">
-                    {(charts?.recent_activity || []).slice(0, 8).map((a: any, i: number) => (
+                    {(charts?.recent_activity || []).slice(0, 10).map((a: any, i: number) => (
                       <div key={i} className="flex items-center justify-between border-b pb-1 last:border-0">
                         <div className="flex items-center gap-2 text-sm">
                           <span className="font-medium">{a.user}</span>
@@ -341,3 +381,5 @@ export default function Dashboard() {
     </DashboardLayout>
   );
 }
+
+function LogOut(props: any) { return <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>; }

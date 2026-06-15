@@ -23,14 +23,19 @@ import {
   Bell,
   Building2,
   CreditCard,
+  Database,
   KeyRound,
   Loader2,
   Lock,
+  Mail,
   Palette,
   Save,
+  Send,
   Settings,
   ShieldCheck,
+  Server,
   User,
+  Zap,
 } from 'lucide-react';
 
 type Gateway = 'none' | 'stripe' | 'razorpay' | 'cash' | 'card' | 'bank_transfer';
@@ -441,7 +446,7 @@ export default function SettingsPage() {
         </div>
 
         <Tabs defaultValue="portal" className="space-y-6">
-          <TabsList className="grid h-auto w-full grid-cols-2 border-2 sm:grid-cols-4">
+          <TabsList className="grid h-auto w-full grid-cols-2 border-2 sm:grid-cols-5">
             <TabsTrigger value="portal">
               <Palette className="mr-2 h-4 w-4" />
               Portal
@@ -457,6 +462,18 @@ export default function SettingsPage() {
             <TabsTrigger value="account">
               <User className="mr-2 h-4 w-4" />
               Account
+            </TabsTrigger>
+            <TabsTrigger value="email">
+              <Mail className="mr-2 h-4 w-4" />
+              Email
+            </TabsTrigger>
+            <TabsTrigger value="integrations">
+              <Zap className="mr-2 h-4 w-4" />
+              Integrations
+            </TabsTrigger>
+            <TabsTrigger value="system">
+              <Server className="mr-2 h-4 w-4" />
+              System
             </TabsTrigger>
           </TabsList>
 
@@ -1105,6 +1122,280 @@ export default function SettingsPage() {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="email" className="space-y-6">
+            <div className="grid gap-6 lg:grid-cols-2">
+              <Card className="border-2">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Mail className="h-5 w-5" />
+                    SMTP Configuration
+                  </CardTitle>
+                  <CardDescription>Configure outgoing email for booking confirmations, invoices, and alerts.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-1">
+                      <Label>SMTP Host</Label>
+                      <Input className="border-2 mt-1" placeholder="smtp.gmail.com" defaultValue="smtp.gmail.com" />
+                    </div>
+                    <div className="space-y-1">
+                      <Label>Port</Label>
+                      <Input className="border-2 mt-1" type="number" placeholder="587" defaultValue="587" />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <Label>From Email</Label>
+                    <Input className="border-2 mt-1" placeholder="noreply@hotelops.com" defaultValue="snipymart@gmail.com" />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>From Name</Label>
+                    <Input className="border-2 mt-1" placeholder="HotelOps" defaultValue="Hotel Harmony" />
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-1">
+                      <Label>SMTP Username</Label>
+                      <Input className="border-2 mt-1" placeholder="email@example.com" />
+                    </div>
+                    <div className="space-y-1">
+                      <Label>SMTP Password</Label>
+                      <Input className="border-2 mt-1" type="password" placeholder="App password" />
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between border-2 p-3">
+                    <div><Label>Enable SSL</Label><p className="text-xs text-muted-foreground">Use TLS/SSL for secure connections</p></div>
+                    <Switch defaultChecked />
+                  </div>
+                  <Button><Mail className="mr-2 h-4 w-4" /> Save Email Settings</Button>
+                  <Button variant="outline" className="ml-2"><Send className="mr-2 h-4 w-4" /> Send Test Email</Button>
+                </CardContent>
+              </Card>
+
+              <Card className="border-2">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Bell className="h-5 w-5" />
+                    Email Notifications
+                  </CardTitle>
+                  <CardDescription>Choose which events trigger automated emails.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {[
+                    ['booking_confirmation', 'Booking Confirmation', 'Sent when a guest completes a reservation'],
+                    ['checkin_reminder', 'Check-in Reminder', 'Sent 24 hours before check-in'],
+                    ['checkout_feedback', 'Check-out & Feedback', 'Sent after check-out requesting review'],
+                    ['invoice_receipt', 'Invoice / Receipt', 'Payment receipt and invoice attachments'],
+                    ['promotional', 'Promotional Offers', 'Marketing emails and special offers'],
+                    ['system_alerts', 'System Alerts', 'Admin notifications for failures or warnings'],
+                  ].map(([key, title, desc]) => (
+                    <div key={key} className="flex items-center justify-between border-b pb-3 last:border-b-0">
+                      <div><p className="font-medium">{title}</p><p className="text-xs text-muted-foreground">{desc}</p></div>
+                      <Switch defaultChecked={key !== 'promotional'} />
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="integrations" className="space-y-6">
+            <div className="grid gap-6 lg:grid-cols-2">
+              <Card className="border-2">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Zap className="h-5 w-5" />
+                    Third-Party Integrations
+                  </CardTitle>
+                  <CardDescription>Connect external services for enhanced functionality.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {[
+                    { name: 'OTA Channel Manager', desc: 'Sync rates & availability with Booking.com, Expedia, etc.', status: 'disconnected' },
+                    { name: 'Accounting (QuickBooks)', desc: 'Export invoices and payments to QuickBooks', status: 'disconnected' },
+                    { name: 'POS System', desc: 'Connect external POS for F&B billing', status: 'disconnected' },
+                    { name: 'Property Management (PMS)', desc: 'Legacy PMS data import/export', status: 'disconnected' },
+                    { name: 'Analytics (Google)', desc: 'Track portal traffic and conversion metrics', status: 'disconnected' },
+                    { name: 'SMS Gateway', desc: 'Transactional SMS for booking alerts', status: 'configured' },
+                  ].map((int, i) => (
+                    <div key={i} className="flex items-center justify-between border-2 p-3">
+                      <div><p className="font-medium">{int.name}</p><p className="text-xs text-muted-foreground">{int.desc}</p></div>
+                      <Badge variant={int.status === 'configured' ? 'default' : 'outline'} className={cn(int.status === 'configured' && 'bg-green-100 text-green-800 border-green-400')}>{int.status}</Badge>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+
+              <Card className="border-2">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <KeyRound className="h-5 w-5" />
+                    API Keys & Webhooks
+                  </CardTitle>
+                  <CardDescription>Manage API keys for external access and webhook endpoints.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-1">
+                    <Label>API Key (Primary)</Label>
+                    <div className="flex gap-2 mt-1">
+                      <Input className="border-2 flex-1 font-mono text-xs" readOnly value="hms_api_live_xxxxxxxxxxxxx" />
+                      <Button variant="outline" size="sm">Regenerate</Button>
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Webhook URL</Label>
+                    <Input className="border-2 mt-1 font-mono text-xs" value="https://api.hotelops.local/webhooks/v1" />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Webhook Secret</Label>
+                    <Input className="border-2 mt-1 font-mono text-xs" type="password" value="whsec_xxxxxxxxxxxxx" />
+                  </div>
+                  <Separator />
+                  <div className="space-y-2">
+                    <Label>Webhook Events</Label>
+                    {['booking.created', 'booking.cancelled', 'payment.completed', 'night_audit.completed', 'invoice.generated'].map(evt => (
+                      <div key={evt} className="flex items-center justify-between border-b pb-2">
+                        <span className="font-mono text-xs">{evt}</span>
+                        <Switch defaultChecked />
+                      </div>
+                    ))}
+                  </div>
+                  <Button><Save className="mr-2 h-4 w-4" /> Save Integration Settings</Button>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* System Admin Tab */}
+          <TabsContent value="system" className="space-y-6">
+            <div className="grid gap-6 lg:grid-cols-2">
+              {/* System Health */}
+              <Card className="border-2">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Server className="h-5 w-5" />
+                    System Health
+                  </CardTitle>
+                  <CardDescription>Real-time system component status</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {[
+                      ['API Server', 'Healthy', '15%'],
+                      ['Database', 'Healthy', '20%'],
+                      ['Web Server', 'Healthy', '10%'],
+                      ['Email Service', 'Healthy', '5%'],
+                      ['Memory', 'Healthy', '45%'],
+                      ['Disk', 'Healthy', '60%'],
+                    ].map(([component, status, usage]) => (
+                      <div key={component as string} className="flex items-center justify-between border-b pb-2 last:border-b-0">
+                        <div>
+                          <p className="font-medium">{component as string}</p>
+                          <p className="text-xs text-muted-foreground">{status as string}</p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="h-2 w-24 rounded-full bg-secondary overflow-hidden">
+                            <div className={cn('h-full rounded-full', parseInt(usage as string) > 80 ? 'bg-destructive' : parseInt(usage as string) > 50 ? 'bg-amber-500' : 'bg-green-500')} style={{width: usage}} />
+                          </div>
+                          <span className="text-sm font-mono">{usage as string}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Backup Management */}
+              <Card className="border-2">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Database className="h-5 w-5" />
+                    Backup Management
+                  </CardTitle>
+                  <CardDescription>Schedule and manage system backups</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="border-2 p-4 space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">Backup Schedule</span>
+                      <Badge variant="outline" className="bg-green-100 text-green-800">Daily</Badge>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Time</span>
+                      <span className="font-mono">02:00 AM UTC</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Retention</span>
+                      <span>30 days</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Auto Backup</span>
+                      <Badge variant="outline" className="bg-green-100 text-green-800">Enabled</Badge>
+                    </div>
+                  </div>
+                  <div className="border-2 p-4">
+                    <h4 className="font-medium mb-2">Recent Backups</h4>
+                    <div className="space-y-2 text-sm">
+                      {[
+                        ['BK-001', '15 Jun 2026', '2.5 GB', 'Completed'],
+                        ['BK-002', '14 Jun 2026', '2.4 GB', 'Completed'],
+                        ['BK-003', '13 Jun 2026', '2.4 GB', 'Completed'],
+                      ].map(([id, date, size, status]) => (
+                        <div key={id as string} className="flex justify-between items-center border-b pb-1 last:border-b-0">
+                          <span className="font-mono text-xs">{id as string}</span>
+                          <span className="text-muted-foreground">{date as string}</span>
+                          <span>{size as string}</span>
+                          <Badge variant="outline" className="text-xs">{status as string}</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <Button variant="outline" className="w-full">
+                    <Database className="h-4 w-4 mr-2" /> Create Manual Backup
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Audit Logs */}
+            <Card className="border-2">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <ShieldCheck className="h-5 w-5" />
+                  Audit Logs
+                </CardTitle>
+                <CardDescription>Recent system activity and changes</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {[
+                    ['15 Jun 14:30', 'User admin updated payment settings', 'info'],
+                    ['15 Jun 14:25', 'Payment processing timeout on booking RES-123', 'warning'],
+                    ['15 Jun 14:20', 'New reservation created for John Doe (RM 305)', 'info'],
+                    ['15 Jun 14:15', 'Database backup completed successfully', 'info'],
+                    ['15 Jun 14:10', 'Failed login attempt for user guest1@gmail.com', 'warning'],
+                    ['15 Jun 14:05', 'Housekeeping task TASK-042 marked as done', 'info'],
+                  ].map(([time, message, level], i) => (
+                    <div key={i} className="flex items-start gap-3 border-b pb-2 last:border-b-0">
+                      <div className={cn(
+                        'mt-1 h-2 w-2 rounded-full shrink-0',
+                        level === 'error' ? 'bg-destructive' : level === 'warning' ? 'bg-amber-500' : 'bg-green-500'
+                      )} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm truncate">{message as string}</p>
+                        <p className="text-xs text-muted-foreground">{time as string}</p>
+                      </div>
+                      <Badge variant="outline" className={cn(
+                        'text-xs capitalize',
+                        level === 'error' && 'border-destructive text-destructive',
+                        level === 'warning' && 'border-amber-500 text-amber-700',
+                        level === 'info' && 'border-blue-500 text-blue-700',
+                      )}>{level as string}</Badge>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
