@@ -18,7 +18,7 @@ import { useStaff } from '@/hooks/useStaff';
 import { useToast } from '@/hooks/use-toast';
 import {
   AlertTriangle, CheckCircle2, Clock, Hammer, Loader2, Plus, RefreshCw,
-  Search, UserCheck, Wrench, CalendarDays, Settings2, Tool,
+  Search, UserCheck, Wrench, CalendarDays, Settings2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -108,7 +108,7 @@ export default function MaintenancePage() {
   ]);
 
   const canSeeAllOrders = hasAnyRole(['platform_admin', 'hotel_admin', 'property_manager', 'super_admin', 'admin', 'receptionist']);
-  const maintenanceStaff = useMemo(() => staff.filter(member => member.roles.some(role => role.role === 'maintenance')), [staff]);
+  const maintenanceStaff = useMemo(() => staff.filter(member => member.roles.some(role => (role.role as string) === 'maintenance')), [staff]);
   const roomsByID = useMemo(() => new Map(rooms.map(room => [room.id, room])), [rooms]);
 
   const fetchItems = async () => {

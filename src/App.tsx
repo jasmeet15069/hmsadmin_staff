@@ -112,13 +112,13 @@ function AppRoutes() {
       <Route path="/staff" element={<StaffRoute roles={STAFF_ROLES} moduleID="staff"><StaffPage /></StaffRoute>} />
       <Route path="/platform" element={<StaffRoute roles={['platform_admin']}><PlatformPage /></StaffRoute>} />
       <Route path="/users" element={<StaffRoute roles={HOTEL_ADMIN_ROLES}><UsersPage /></StaffRoute>} />
-      <Route path="/revenue" element={<StaffRoute roles={['platform_admin','hotel_admin','property_manager','super_admin']} moduleId="revenue"><RevenuePage /></StaffRoute>} />
-      <Route path="/procurement" element={<StaffRoute roles={['platform_admin','hotel_admin','super_admin']} moduleId="procurement"><ProcurementPage /></StaffRoute>} />
-      <Route path="/crm" element={<StaffRoute roles={['platform_admin','hotel_admin','super_admin']} moduleId="crm"><CrmPage /></StaffRoute>} />
-      <Route path="/channels" element={<StaffRoute roles={['platform_admin','hotel_admin','super_admin']} moduleId="channels"><ChannelPage /></StaffRoute>} />
-      <Route path="/night-audit" element={<StaffRoute roles={['platform_admin','hotel_admin','super_admin']} moduleId="night-audit"><NightAuditPage /></StaffRoute>} />
-      <Route path="/booking-engine" element={<StaffRoute roles={['platform_admin','hotel_admin','super_admin']} moduleId="booking-engine"><BookingEnginePage /></StaffRoute>} />
-      <Route path="/multi-property" element={<StaffRoute roles={['platform_admin','super_admin']} moduleId="multi-property"><MultiPropertyPage /></StaffRoute>} />
+      <Route path="/revenue" element={<StaffRoute roles={['platform_admin','hotel_admin','property_manager','super_admin']} moduleID="revenue"><RevenuePage /></StaffRoute>} />
+      <Route path="/procurement" element={<StaffRoute roles={['platform_admin','hotel_admin','super_admin']} moduleID="procurement"><ProcurementPage /></StaffRoute>} />
+      <Route path="/crm" element={<StaffRoute roles={['platform_admin','hotel_admin','super_admin']} moduleID="crm"><CrmPage /></StaffRoute>} />
+      <Route path="/channels" element={<StaffRoute roles={['platform_admin','hotel_admin','super_admin']} moduleID="channels"><ChannelPage /></StaffRoute>} />
+      <Route path="/night-audit" element={<StaffRoute roles={['platform_admin','hotel_admin','super_admin']} moduleID="night-audit"><NightAuditPage /></StaffRoute>} />
+      <Route path="/booking-engine" element={<StaffRoute roles={['platform_admin','hotel_admin','super_admin']} moduleID="booking-engine"><BookingEnginePage /></StaffRoute>} />
+      <Route path="/multi-property" element={<StaffRoute roles={['platform_admin','super_admin']} moduleID="multi-property"><MultiPropertyPage /></StaffRoute>} />
       
       <Route path="*" element={<NotFound />} />
     </Routes>

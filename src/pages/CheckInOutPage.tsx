@@ -24,7 +24,7 @@ import { cn } from '@/lib/utils';
 const apiBase = import.meta.env.VITE_API_URL || '/api';
 
 const statusBadge = (s: string) => {
-  const map: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' | 'success' }> = {
+  const map: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
     upcoming: { label: 'Upcoming', variant: 'secondary' },
     pending_checkin: { label: 'Pending Check-in', variant: 'destructive' },
     in_house: { label: 'In House', variant: 'default' },
@@ -124,7 +124,7 @@ export default function CheckInOutPage() {
     setSelectedReservation(r);
     setCollectPayment(r.total_amount || 0);
     try {
-      const res = await fetch(`${apiBase}/billing/folios?booking_id=${r.id}`);
+      const res = await window.fetch(`${apiBase}/billing/folios?booking_id=${r.id}`);
       const json = await res.json();
       setFolioCharges(json.data?.charges || []);
     } catch { setFolioCharges([]); }
@@ -162,10 +162,10 @@ export default function CheckInOutPage() {
       const r = selectedReservation || filtered[0];
       if (r?.guest_email) {
         const body = `Dear ${r.guest_name}, welcome to our hotel! Your room is ready. Please let us know if you need anything.`;
-        await fetch(`${apiBase}/email/send`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeaders() }, body: JSON.stringify({ to: r.guest_email, subject: 'Welcome to the Hotel!', body, guest_name: r.guest_name }) });
+        await window.fetch(`${apiBase}/email/send`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeaders() }, body: JSON.stringify({ to: r.guest_email, subject: 'Welcome to the Hotel!', body, guest_name: r.guest_name }) });
       }
       if (r?.guest_phone) {
-        await fetch(`${apiBase}/sms/send`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeaders() }, body: JSON.stringify({ to: r.guest_phone, message: `Welcome ${r.guest_name}! Your room is ready. - Hotel Harmony` }) });
+        await window.fetch(`${apiBase}/sms/send`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeaders() }, body: JSON.stringify({ to: r.guest_phone, message: `Welcome ${r.guest_name}! Your room is ready. - Hotel Harmony` }) });
       }
       toast({ title: 'Welcome message sent' });
     } catch { toast({ title: 'Welcome message sent' }); }
@@ -183,10 +183,10 @@ export default function CheckInOutPage() {
     try {
       const r = selectedReservation;
       if (r.guest_email) {
-        await fetch(`${apiBase}/email/send`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeaders() }, body: JSON.stringify({ to: r.guest_email, subject: 'Message from Hotel Harmony', body: messageText, guest_name: r.guest_name }) });
+        await window.fetch(`${apiBase}/email/send`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeaders() }, body: JSON.stringify({ to: r.guest_email, subject: 'Message from Hotel Harmony', body: messageText, guest_name: r.guest_name }) });
       }
       if (r.guest_phone) {
-        await fetch(`${apiBase}/sms/send`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeaders() }, body: JSON.stringify({ to: r.guest_phone, message: messageText }) });
+        await window.fetch(`${apiBase}/sms/send`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeaders() }, body: JSON.stringify({ to: r.guest_phone, message: messageText }) });
       }
       toast({ title: 'Message sent', description: `To ${r.guest_name}: ${messageText}` });
     } catch { toast({ title: 'Error sending message', variant: 'destructive' }); }
@@ -446,10 +446,10 @@ export default function CheckInOutPage() {
                 <div className="border rounded-lg p-3">
                   <h4 className="text-sm font-medium mb-2 flex items-center gap-2"><Building2 className="h-4 w-4" />Room Assignment</h4>
                   <div className="flex flex-wrap gap-2">
-                    {rooms.filter(r => r.status === 'available' || r.id === selectedReservation.room_id).slice(0, 12).map(r => (
+                    {rooms.filter(r => r.status === 'available' || r.room_number === selectedReservation.room_number).slice(0, 12).map(r => (
                       <button key={r.id} className={cn(
                         'border-2 rounded-lg p-2 text-center text-xs w-20 transition-all',
-                        r.id === selectedReservation.room_id ? 'border-primary bg-primary/10 ring-2 ring-primary' :
+                        r.room_number === selectedReservation.room_number ? 'border-primary bg-primary/10 ring-2 ring-primary' :
                         r.status === 'available' ? 'border-green-300 hover:border-green-500' : 'border-gray-200 opacity-50'
                       )}>
                         <p className="font-bold">{r.room_number}</p>

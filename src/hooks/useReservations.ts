@@ -38,7 +38,7 @@ export function useReservations() {
       const qs = new URLSearchParams();
       if (params?.status) qs.set('status', params.status);
       if (params?.search) qs.set('search', params.search);
-      const res = await fetch(`${API_BASE}/reservations?${qs}`);
+      const res = await window.fetch(`${API_BASE}/reservations?${qs}`);
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Failed to fetch');
       setReservations(json.data || []);
@@ -54,7 +54,7 @@ export function useReservations() {
     guest_name: string; guest_email?: string; guest_phone?: string;
     room_id: string; check_in_date: string; check_out_date: string; notes?: string;
   }) => {
-    const res = await fetch(`${API_BASE}/reservations`, {
+    const res = await window.fetch(`${API_BASE}/reservations`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -66,26 +66,26 @@ export function useReservations() {
   };
 
   const cancel = async (id: string) => {
-    const res = await fetch(`${API_BASE}/reservations/${id}`, { method: 'DELETE' });
+    const res = await window.fetch(`${API_BASE}/reservations/${id}`, { method: 'DELETE' });
     if (!res.ok) throw new Error('Failed to cancel');
     await fetch();
   };
 
   const checkIn = async (id: string) => {
-    const res = await fetch(`${API_BASE}/reservations/${id}/checkin`, { method: 'POST' });
+    const res = await window.fetch(`${API_BASE}/reservations/${id}/checkin`, { method: 'POST' });
     if (!res.ok) throw new Error('Failed to check in');
     await fetch();
   };
 
   const checkOut = async (id: string) => {
-    const res = await fetch(`${API_BASE}/reservations/${id}/checkout`, { method: 'POST' });
+    const res = await window.fetch(`${API_BASE}/reservations/${id}/checkout`, { method: 'POST' });
     if (!res.ok) throw new Error('Failed to check out');
     await fetch();
   };
 
   const getCalendar = async (month?: string): Promise<CalendarDay[]> => {
     const m = month || new Date().toISOString().slice(0, 7);
-    const res = await fetch(`${API_BASE}/reservations/calendar?month=${m}`);
+    const res = await window.fetch(`${API_BASE}/reservations/calendar?month=${m}`);
     const json = await res.json();
     return json.data || [];
   };

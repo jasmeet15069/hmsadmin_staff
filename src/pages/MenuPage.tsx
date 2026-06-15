@@ -207,7 +207,7 @@ export default function MenuPage() {
         : await createItem(payload);
 
       if (result) {
-        const itemId = editingItem?.id || (typeof result === 'object' ? result.id : null);
+        const itemId = editingItem?.id || (typeof result === 'object' ? (result as { id?: string }).id : null);
         if (itemId) await syncCustomizations(itemId);
         await refetch();
         setIsDialogOpen(false);

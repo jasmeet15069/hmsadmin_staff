@@ -13,7 +13,7 @@ import { usePayments } from '@/hooks/usePayments';
 import { useHotelBranding } from '@/hooks/useHotelBranding';
 import { formatCurrency, getCountryOption } from '@/lib/currency';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, CheckCircle, XCircle, Clock, Search, RefreshCw, Plus, FileText, DollarSign, CreditCard, Receipt, Eye, Banknote, Landmark, Percent, Shield } from 'lucide-react';
+import { Loader2, CheckCircle, XCircle, Clock, Search, RefreshCw, Plus, FileText, DollarSign, CreditCard, Receipt, Eye, Landmark, Shield } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 type FolioStatus = 'open' | 'closed' | 'pending' | 'disputed';

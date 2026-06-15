@@ -19,7 +19,7 @@ type ApiResult<T = unknown> = {
 
 type Filter = {
   column: string;
-  operator: 'eq' | 'is';
+  operator: 'eq' | 'is' | 'in' | 'not';
   value: unknown;
 };
 
@@ -79,6 +79,7 @@ class QueryBuilder<T = unknown> implements PromiseLike<ApiResult<T>> {
   private orders: OrderSpec[] = [];
   private body: unknown;
   private singleMode: 'single' | 'maybeSingle' | null = null;
+  private limitCount: number | null = null;
 
   constructor(private table: string) {}
 
@@ -111,6 +112,23 @@ class QueryBuilder<T = unknown> implements PromiseLike<ApiResult<T>> {
 
   is(column: string, value: unknown) {
     this.filters.push({ column, operator: 'is', value });
+    return this;
+  }
+
+  in(column: string, values: readonly unknown[]) {
+    this.filters.push({ column, operator: 'in', value: values });
+    return this;
+  }
+
+  // Mirrors PostgREST's .not(column, operator, value); the inner operator is
+  // folded into the negation since the compat backend treats filters loosely.
+  not(column: string, _operator: string, value: unknown) {
+    this.filters.push({ column, operator: 'not', value });
+    return this;
+  }
+
+  limit(count: number) {
+    this.limitCount = count;
     return this;
   }
 
@@ -153,7 +171,13 @@ class QueryBuilder<T = unknown> implements PromiseLike<ApiResult<T>> {
         orders: JSON.stringify(this.orders),
         single: this.singleMode || '',
       });
-      return apiRequest<T>(`/tables/${encodedTable}?${params.toString()}`);
+      const result = await apiRequest<T>(`/tables/${encodedTable}?${params.toString()}`);
+      // The compat backend ignores limit; enforce it client-side so callers
+      // that rely on .limit(n) get at most n rows instead of the full table.
+      if (this.limitCount != null && Array.isArray(result.data)) {
+        return { ...result, data: (result.data as unknown[]).slice(0, this.limitCount) as unknown as T };
+      }
+      return result;
     }
 
     const method = this.action === 'insert' ? 'POST' : this.action === 'update' ? 'PATCH' : 'DELETE';
@@ -179,12 +203,16 @@ function notifyAuth(event: string, session: Session | null) {
 
 export const supabase = {
   from<TTable extends keyof Database['public']['Tables'] & string>(table: TTable) {
-    return new QueryBuilder(table);
+    // The compat backend returns JSON shaped per-table; PostgREST's full
+    // generic typing isn't expressible through this shim, so callers receive a
+    // permissive builder and assert their own row types (consistent with the
+    // project's strict:false config). Avoids ~50 spurious 'unknown' errors.
+    return new QueryBuilder<any>(table);
   },
 
   channel() {
     const callbacks = new Set<() => void>();
-    let intervalId: ReturnType<typeof window.setInterval> | null = null;
+    let intervalId: number | null = null;
     let focusHandler: (() => void) | null = null;
     const channel: LocalChannel = {
       on(_event: string, _filter: unknown, callback: () => void) {
@@ -272,7 +300,7 @@ export const supabase = {
       return { error: null };
     },
 
-    async updateUser(values: { password?: string }) {
+    async updateUser(values: { password?: string; current_password?: string }) {
       const session = readSession();
       const { data, error } = await apiRequest<AuthUser>('/auth/user', {
         method: 'PATCH',
