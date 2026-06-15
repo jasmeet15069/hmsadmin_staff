@@ -93,14 +93,14 @@ export const ROLE_PORTAL_PRESETS: Record<AppRole, RolePortalPreset> = {
     title: ROLE_LABELS.super_admin,
     description: 'Owner control across setup, staff, reports, payments, and all operations.',
     defaultPath: '/dashboard',
-    modules: ['dashboard', 'rooms', 'guests', 'housekeeping', 'maintenance', 'complaints', 'payments', 'menu', 'inventory', 'order_queue', 'reports', 'settings', 'staff'],
+    modules: ['dashboard', 'rooms', 'guests', 'housekeeping', 'maintenance', 'complaints', 'payments', 'menu', 'inventory', 'order_queue', 'reports', 'settings', 'staff', 'pos', 'users', 'revenue', 'procurement', 'crm', 'channels', 'night-audit', 'booking-engine', 'multi-property'],
   },
   hotel_admin: {
     role: 'hotel_admin',
     title: ROLE_LABELS.hotel_admin,
     description: ROLE_DESCRIPTIONS.hotel_admin,
     defaultPath: '/dashboard',
-    modules: ['dashboard', 'rooms', 'guests', 'housekeeping', 'maintenance', 'complaints', 'payments', 'menu', 'inventory', 'order_queue', 'reports', 'settings', 'staff'],
+    modules: ['dashboard', 'rooms', 'guests', 'housekeeping', 'maintenance', 'complaints', 'payments', 'menu', 'inventory', 'order_queue', 'reports', 'settings', 'staff', 'pos', 'users', 'revenue', 'procurement', 'crm', 'channels', 'night-audit', 'booking-engine', 'multi-property'],
   },
   property_manager: {
     role: 'property_manager',
