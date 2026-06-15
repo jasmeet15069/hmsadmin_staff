@@ -14,6 +14,14 @@ import {
   Users,
   UtensilsCrossed,
   Wrench,
+  TrendingUp,
+  Truck,
+  Heart,
+  Radio,
+  Moon,
+  Globe,
+  Building2,
+  ShoppingCart,
 } from 'lucide-react';
 import { AppRole, ROLE_DESCRIPTIONS, ROLE_LABELS } from '@/types/auth';
 
@@ -44,9 +52,17 @@ export const STAFF_NAV_ITEMS: StaffNavItem[] = [
   { id: 'payments', label: 'Payments', href: '/payments', icon: CreditCard, roles: ['platform_admin', 'hotel_admin', 'receptionist', 'super_admin', 'admin'] },
   { id: 'menu', label: 'Menu', href: '/menu', icon: UtensilsCrossed, roles: ['platform_admin', 'hotel_admin', 'super_admin', 'food_manager'] },
   { id: 'inventory', label: 'Inventory', href: '/inventory', icon: Package, roles: ['platform_admin', 'hotel_admin', 'super_admin', 'food_manager', 'kitchen_manager'] },
+  { id: 'pos', label: 'POS', href: '/pos', icon: ShoppingCart, roles: ['platform_admin', 'hotel_admin', 'super_admin', 'food_manager', 'kitchen_manager', 'waiter'] },
   { id: 'order_queue', label: 'Order Queue', href: '/kitchen', icon: ChefHat, roles: ['platform_admin', 'hotel_admin', 'super_admin', 'kitchen_manager', 'waiter'] },
   { id: 'reports', label: 'Reports', href: '/reports', icon: BarChart3, roles: ['platform_admin', 'hotel_admin', 'property_manager', 'super_admin'] },
   { id: 'users', label: 'Users', href: '/users', icon: Users, roles: ['platform_admin', 'hotel_admin', 'super_admin'] },
+  { id: 'revenue', label: 'Revenue', href: '/revenue', icon: TrendingUp, roles: ['platform_admin', 'hotel_admin', 'super_admin'] },
+  { id: 'procurement', label: 'Procurement', href: '/procurement', icon: Truck, roles: ['platform_admin', 'hotel_admin', 'super_admin'] },
+  { id: 'crm', label: 'CRM', href: '/crm', icon: Heart, roles: ['platform_admin', 'hotel_admin', 'super_admin'] },
+  { id: 'channels', label: 'Channels', href: '/channels', icon: Radio, roles: ['platform_admin', 'hotel_admin', 'super_admin'] },
+  { id: 'night-audit', label: 'Night Audit', href: '/night-audit', icon: Moon, roles: ['platform_admin', 'hotel_admin', 'super_admin'] },
+  { id: 'booking-engine', label: 'Booking Engine', href: '/booking-engine', icon: Globe, roles: ['platform_admin', 'hotel_admin', 'super_admin'] },
+  { id: 'multi-property', label: 'Multi-Property', href: '/multi-property', icon: Building2, roles: ['platform_admin', 'super_admin'] },
   { id: 'settings', label: 'Settings', href: '/settings', icon: Settings, roles: ['platform_admin', 'hotel_admin', 'super_admin'] },
   { id: 'platform', label: 'Platform', href: '/platform', icon: ShieldCheck, roles: ['platform_admin'] },
 ];

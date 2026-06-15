@@ -116,6 +116,18 @@ export default function SettingsPage() {
   const [isSavingPortal, setIsSavingPortal] = useState(false);
   const [isSavingPayments, setIsSavingPayments] = useState(false);
   const [isSavingAccount, setIsSavingAccount] = useState(false);
+  const [isSendingTestEmail, setIsSendingTestEmail] = useState(false);
+
+  const sendTestEmail = async () => {
+    setIsSendingTestEmail(true);
+    try {
+      await apiJSON('/email/send', { method: 'POST', body: JSON.stringify({ to: user?.email || 'test@example.com', subject: 'Test Email from Hotel Harmony', body: '<h2>Test Email</h2><p>This is a test email from Hotel Harmony settings.</p>', guest_name: user?.profile?.full_name || 'Admin' }) });
+      toast({ title: 'Test email sent', description: `Check ${user?.email || 'your inbox'}` });
+    } catch (e: any) {
+      toast({ title: 'Error', description: e.message, variant: 'destructive' });
+    }
+    setIsSendingTestEmail(false);
+  };
   const [profile, setProfile] = useState({
     full_name: user?.profile?.full_name || '',
     phone: user?.profile?.phone || '',
@@ -1168,7 +1180,7 @@ export default function SettingsPage() {
                     <Switch defaultChecked />
                   </div>
                   <Button><Mail className="mr-2 h-4 w-4" /> Save Email Settings</Button>
-                  <Button variant="outline" className="ml-2"><Send className="mr-2 h-4 w-4" /> Send Test Email</Button>
+                  <Button variant="outline" className="ml-2" onClick={sendTestEmail} disabled={isSendingTestEmail}><Send className="mr-2 h-4 w-4" /> {isSendingTestEmail ? 'Sending...' : 'Send Test Email'}</Button>
                 </CardContent>
               </Card>
 

@@ -154,7 +154,25 @@ export default function CrmPage() {
 
   const handleSendMessage = async () => {
     if (!selectedGuest || !messageText) return;
-    toast({ title: 'Message sent', description: `Message sent to ${selectedGuest.name}` });
+    try {
+      const authHeaders = () => {
+        try {
+          const raw = localStorage.getItem('hotel_harmony_session');
+          const s = raw ? JSON.parse(raw) : null;
+          return s?.access_token ? { Authorization: `Bearer ${s.access_token}` } : {};
+        } catch { return {}; }
+      };
+      const payload: any = { to: selectedGuest.email, subject: 'Message from Hotel Harmony', body: messageText };
+      if (!payload.to || !payload.to.includes('@')) {
+        payload.to = selectedGuest.phone || selectedGuest.email;
+        if (payload.to) {
+          await fetch('/api/sms/send', { method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeaders() }, body: JSON.stringify({ to: payload.to, message: messageText }) });
+        }
+      } else {
+        await fetch('/api/email/send', { method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeaders() }, body: JSON.stringify(payload) });
+      }
+      toast({ title: 'Message sent', description: `Message sent to ${selectedGuest.name}` });
+    } catch { toast({ title: 'Error sending message', variant: 'destructive' }); }
     setIsMessageOpen(false);
     setMessageText('');
   };

@@ -21,6 +21,14 @@ import ReportsPage from "./pages/ReportsPage";
 import PlatformPage from "./pages/PlatformPage";
 import PlanLockedPage from "./pages/PlanLockedPage";
 import UsersPage from "./pages/UsersPage";
+import RevenuePage from "./pages/RevenuePage";
+import ProcurementPage from "./pages/ProcurementPage";
+import CrmPage from "./pages/CrmPage";
+import ChannelPage from "./pages/ChannelPage";
+import NightAuditPage from "./pages/NightAuditPage";
+import BookingEnginePage from "./pages/BookingEnginePage";
+import MultiPropertyPage from "./pages/MultiPropertyPage";
+import PosPage from "./pages/PosPage";
 import NotFound from "./pages/NotFound";
 import { defaultPortalPath } from "@/lib/rolePortal";
 import { useHotelBranding } from "@/hooks/useHotelBranding";
@@ -94,6 +102,7 @@ function AppRoutes() {
       <Route path="/payments" element={<StaffRoute roles={PAYMENT_ROLES} moduleID="payments"><PaymentsPage /></StaffRoute>} />
       <Route path="/housekeeping" element={<StaffRoute roles={[...PROPERTY_OPS_ROLES, 'housekeeping']} moduleID="housekeeping"><HousekeepingPage /></StaffRoute>} />
       <Route path="/maintenance" element={<StaffRoute roles={[...PROPERTY_OPS_ROLES, 'maintenance']} moduleID="maintenance"><MaintenancePage /></StaffRoute>} />
+      <Route path="/pos" element={<StaffRoute roles={KITCHEN_ROLES} moduleID="pos"><PosPage /></StaffRoute>} />
       <Route path="/kitchen" element={<StaffRoute roles={KITCHEN_ROLES} moduleID="order_queue"><KitchenQueue /></StaffRoute>} />
       <Route path="/menu" element={<StaffRoute roles={FOOD_MANAGER_ROLES} moduleID="menu"><MenuPage /></StaffRoute>} />
       <Route path="/inventory" element={<StaffRoute roles={INVENTORY_ROLES} moduleID="inventory"><InventoryPage /></StaffRoute>} />
@@ -103,6 +112,13 @@ function AppRoutes() {
       <Route path="/staff" element={<StaffRoute roles={STAFF_ROLES} moduleID="staff"><StaffPage /></StaffRoute>} />
       <Route path="/platform" element={<StaffRoute roles={['platform_admin']}><PlatformPage /></StaffRoute>} />
       <Route path="/users" element={<StaffRoute roles={HOTEL_ADMIN_ROLES}><UsersPage /></StaffRoute>} />
+      <Route path="/revenue" element={<StaffRoute roles={['platform_admin','hotel_admin','property_manager','super_admin']} moduleId="revenue"><RevenuePage /></StaffRoute>} />
+      <Route path="/procurement" element={<StaffRoute roles={['platform_admin','hotel_admin','super_admin']} moduleId="procurement"><ProcurementPage /></StaffRoute>} />
+      <Route path="/crm" element={<StaffRoute roles={['platform_admin','hotel_admin','super_admin']} moduleId="crm"><CrmPage /></StaffRoute>} />
+      <Route path="/channels" element={<StaffRoute roles={['platform_admin','hotel_admin','super_admin']} moduleId="channels"><ChannelPage /></StaffRoute>} />
+      <Route path="/night-audit" element={<StaffRoute roles={['platform_admin','hotel_admin','super_admin']} moduleId="night-audit"><NightAuditPage /></StaffRoute>} />
+      <Route path="/booking-engine" element={<StaffRoute roles={['platform_admin','hotel_admin','super_admin']} moduleId="booking-engine"><BookingEnginePage /></StaffRoute>} />
+      <Route path="/multi-property" element={<StaffRoute roles={['platform_admin','super_admin']} moduleId="multi-property"><MultiPropertyPage /></StaffRoute>} />
       
       <Route path="*" element={<NotFound />} />
     </Routes>

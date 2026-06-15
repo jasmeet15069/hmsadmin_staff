@@ -148,17 +148,25 @@ export default function CheckInOutPage() {
     catch (e: any) { toast({ title: 'Error', description: e.message, variant: 'destructive' }); }
   };
 
+  const authHeaders = () => {
+    try {
+      const raw = localStorage.getItem('hotel_harmony_session');
+      const s = raw ? JSON.parse(raw) : null;
+      return s?.access_token ? { Authorization: `Bearer ${s.access_token}` } : {};
+    } catch { return {}; }
+  };
+
   const handleSendWelcome = async () => {
     setIsSendingWelcome(true);
     try {
-      const authHeaders = () => {
-        try {
-          const rawSession = localStorage.getItem('hotel_harmony_session');
-          const session = rawSession ? JSON.parse(rawSession) : null;
-          return session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {};
-        } catch { return {}; }
-      };
-      await fetch(`${apiBase}/ai/chat`, { headers: authHeaders() });
+      const r = selectedReservation || filtered[0];
+      if (r?.guest_email) {
+        const body = `Dear ${r.guest_name}, welcome to our hotel! Your room is ready. Please let us know if you need anything.`;
+        await fetch(`${apiBase}/email/send`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeaders() }, body: JSON.stringify({ to: r.guest_email, subject: 'Welcome to the Hotel!', body, guest_name: r.guest_name }) });
+      }
+      if (r?.guest_phone) {
+        await fetch(`${apiBase}/sms/send`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeaders() }, body: JSON.stringify({ to: r.guest_phone, message: `Welcome ${r.guest_name}! Your room is ready. - Hotel Harmony` }) });
+      }
       toast({ title: 'Welcome message sent' });
     } catch { toast({ title: 'Welcome message sent' }); }
     setIsSendingWelcome(false);
@@ -170,9 +178,18 @@ export default function CheckInOutPage() {
     setIsMessagingOpen(true);
   };
 
-  const handleSendMessage = () => {
-    if (!messageText.trim()) return;
-    toast({ title: 'Message sent', description: `To ${selectedReservation?.guest_name}: ${messageText}` });
+  const handleSendMessage = async () => {
+    if (!messageText.trim() || !selectedReservation) return;
+    try {
+      const r = selectedReservation;
+      if (r.guest_email) {
+        await fetch(`${apiBase}/email/send`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeaders() }, body: JSON.stringify({ to: r.guest_email, subject: 'Message from Hotel Harmony', body: messageText, guest_name: r.guest_name }) });
+      }
+      if (r.guest_phone) {
+        await fetch(`${apiBase}/sms/send`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...authHeaders() }, body: JSON.stringify({ to: r.guest_phone, message: messageText }) });
+      }
+      toast({ title: 'Message sent', description: `To ${r.guest_name}: ${messageText}` });
+    } catch { toast({ title: 'Error sending message', variant: 'destructive' }); }
     setMessageText('');
     setIsMessagingOpen(false);
   };
