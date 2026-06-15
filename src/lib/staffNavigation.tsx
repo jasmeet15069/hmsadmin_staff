@@ -46,6 +46,7 @@ export const STAFF_NAV_ITEMS: StaffNavItem[] = [
   { id: 'inventory', label: 'Inventory', href: '/inventory', icon: Package, roles: ['platform_admin', 'hotel_admin', 'super_admin', 'food_manager', 'kitchen_manager'] },
   { id: 'order_queue', label: 'Order Queue', href: '/kitchen', icon: ChefHat, roles: ['platform_admin', 'hotel_admin', 'super_admin', 'kitchen_manager', 'waiter'] },
   { id: 'reports', label: 'Reports', href: '/reports', icon: BarChart3, roles: ['platform_admin', 'hotel_admin', 'property_manager', 'super_admin'] },
+  { id: 'users', label: 'Users', href: '/users', icon: Users, roles: ['platform_admin', 'hotel_admin', 'super_admin'] },
   { id: 'settings', label: 'Settings', href: '/settings', icon: Settings, roles: ['platform_admin', 'hotel_admin', 'super_admin'] },
   { id: 'platform', label: 'Platform', href: '/platform', icon: ShieldCheck, roles: ['platform_admin'] },
 ];

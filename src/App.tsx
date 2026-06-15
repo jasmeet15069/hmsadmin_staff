@@ -20,6 +20,7 @@ import MaintenancePage from "./pages/MaintenancePage";
 import ReportsPage from "./pages/ReportsPage";
 import PlatformPage from "./pages/PlatformPage";
 import PlanLockedPage from "./pages/PlanLockedPage";
+import UsersPage from "./pages/UsersPage";
 import NotFound from "./pages/NotFound";
 import { defaultPortalPath } from "@/lib/rolePortal";
 import { useHotelBranding } from "@/hooks/useHotelBranding";
@@ -101,6 +102,7 @@ function AppRoutes() {
       <Route path="/settings" element={<StaffRoute roles={HOTEL_ADMIN_ROLES} moduleID="settings"><SettingsPage /></StaffRoute>} />
       <Route path="/staff" element={<StaffRoute roles={STAFF_ROLES} moduleID="staff"><StaffPage /></StaffRoute>} />
       <Route path="/platform" element={<StaffRoute roles={['platform_admin']}><PlatformPage /></StaffRoute>} />
+      <Route path="/users" element={<StaffRoute roles={HOTEL_ADMIN_ROLES}><UsersPage /></StaffRoute>} />
       
       <Route path="*" element={<NotFound />} />
     </Routes>
